@@ -1,0 +1,21 @@
+---
+- name: Get system information
+  hosts: all
+  vars:
+    ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+    ansible_become_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+  tasks:
+    - name: Print Registered User
+      shell: "cat  /etc/passwd|awk -F: '$3 > 999 && $3 < 10000 {print $0}'"
+      become: yes
+      register: cmd_output
+    - name: Check NVIDIA driver information
+      shell: "nvidia-smi"
+      register: nvidia_output
+
+    - debug:
+        var: cmd_output.stdout_lines
+
+    - debug:
+        var: nvidia_output.stdout_lines 
+

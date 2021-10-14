@@ -1,0 +1,12 @@
+all:
+  children:
+    gpus:
+      hosts:
+        3090a:
+        3090b:
+        3090c:
+        3090d:
+      vars:
+        ansible_port: 2222
+        ansible_user: dev
+        ansible_python_interpreter: python3
