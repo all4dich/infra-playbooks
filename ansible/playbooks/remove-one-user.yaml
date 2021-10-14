@@ -1,0 +1,17 @@
+---
+- name: Remove User Account
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+    - name: user_name
+      prompt: "Set username"
+      private: no
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    - name: Remove user account
+      ansible.builtin.user:
+        name: "{{ user_name }}"
+        state: absent
+        remove: yes

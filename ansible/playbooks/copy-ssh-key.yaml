@@ -1,0 +1,23 @@
+---
+- name: Copy SSH Keys
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+      default: "all"
+    - name: username
+      prompt: "Set username"
+      private: no
+    - name: copy_mode
+      prompt: "Copy an ssh key and remove other key contents on the remote(True/False)"
+      private: no
+      default: False
+  hosts: "{{ target_host }}"
+  tasks:
+    - name: Copy SSH Keys
+      ansible.posix.authorized_key:
+        user: "{{  username  }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+        exclusive: "{{  copy_mode  }}"
+        

@@ -1,0 +1,12 @@
+all:
+  children:
+    seocho_idc_public:
+      hosts:
+        3090b:
+          ansible_host: 143.248.251.91
+      vars:
+        ansible_port: 2222
+        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+        ansible_python_interpreter: python3

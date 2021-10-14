@@ -1,0 +1,19 @@
+all:
+  children:
+    seocho_idc_vpn:
+      hosts:
+        3090e:
+          ansible_host: 192.168.200.143
+        3090f:
+          ansible_host: 192.168.200.144
+        3090g:
+          ansible_host: 192.168.200.145
+        3090h:
+          ansible_host: 192.168.200.146
+      vars:
+        ansible_port: 2222
+        ansible_user: dev
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD_seocho") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD_seocho") }}'
+        ansible_python_interpreter: python3
+

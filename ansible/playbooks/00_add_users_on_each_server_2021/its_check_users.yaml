@@ -1,0 +1,15 @@
+---
+- name: Add users
+  hosts: wisdom
+  become: yes
+  tasks:
+    - name: Add modelseach developers
+      ansible.builtin.shell: id ~${{ item }}
+      loop:
+        - tsmoon
+        - kysim
+        - thyu
+        - sebaek
+        - jwyoon
+        - jmdo
+        - hhpark

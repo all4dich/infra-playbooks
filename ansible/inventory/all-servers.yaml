@@ -1,0 +1,90 @@
+all:
+  children:
+    gpu_10xx_20xx:
+      hosts:
+        honest:
+          ansible_host: 10.169.20.100
+        truth:
+          ansible_host: 10.169.20.102
+        love:
+          ansible_host: 10.169.20.101
+        wish:
+          ansible_host: 10.169.20.105
+        beauty:
+          ansible_host: 10.169.20.103
+        wisdom:
+          ansible_host: 10.169.20.104
+        sejong:
+          ansible_host: 10.169.20.106
+        galilei:
+          ansible_host: 10.169.20.107
+        hope:
+          ansible_host: 10.169.20.108
+        dasom:
+          ansible_host: 10.169.20.109
+      vars:
+        ansible_port: 2222
+        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+        ansible_python_interpreter: python3
+    gpu_3090:
+      hosts:
+        3090a:
+          ansible_host: 10.169.20.110
+        3090b:
+          ansible_host: 10.169.20.111
+        3090c:
+          ansible_host: 10.169.20.112
+        3090d:
+          ansible_host: 10.169.20.113
+      vars:
+        ansible_port: 2222
+        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+        ansible_python_interpreter: python3
+    seocho_idc_public:
+      hosts:
+        3090e:
+          ansible_host: 221.139.0.143
+        3090f:
+          ansible_host: 221.139.0.144
+        3090g:
+          ansible_host: 221.139.0.145
+        3090h:
+          ansible_host: 221.139.0.146
+      vars:
+        ansible_port: 2222
+        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+        ansible_python_interpreter: python3
+    seoul_gpu:
+      hosts:
+        3090i:
+          ansible_host: 10.169.10.17
+        3090j:
+          ansible_host: 10.169.10.18
+        3090k:
+          ansible_host: 10.169.10.19
+        3090l:
+          ansible_host: 10.169.10.20
+      vars:
+        ansible_port: 2222
+        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+        ansible_python_interpreter: python3
+    seoul_workstation:
+      hosts:
+        adam:
+          ansible_host: 10.169.10.15
+        eve:
+          ansible_host: 10.169.10.14
+      vars:
+        ansible_port: 2222
+        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+        ansible_python_interpreter: python3

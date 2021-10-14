@@ -1,0 +1,12 @@
+---
+- name: Install Open JDK 8
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install JDk 8
+      apt:
+        pkg:
+          - openjdk-8-jdk
+        state: latest
+        update_cache: true
+

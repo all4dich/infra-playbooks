@@ -1,0 +1,15 @@
+---
+- name: Copy dir to targets
+  vars_prompt:
+    - name: target_dir
+      prompt: "Set Target Directory"
+      private: no
+    - name: source_dir
+      prompt: "Set Source Directory"
+      private: no
+  hosts: gpu_10xx_20xx 
+  tasks:
+    - name: Copy Directory
+      ansible.builtin.copy:
+        src: "{{ source_dir }}"
+        dest: "{{ target_dir }}"

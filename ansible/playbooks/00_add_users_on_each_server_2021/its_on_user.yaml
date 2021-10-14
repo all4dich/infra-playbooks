@@ -1,0 +1,16 @@
+---
+- name: Add users
+  hosts: wisdom
+  become: yes
+  tasks:
+    - name: Add modelseach developers
+      ansible.builtin.user:
+        name: "{{ item }}"
+        shell: /bin/bash
+        home: "/ssd5/{{  item  }}"
+        state: present
+        groups: "users,docker"
+        append: yes
+        password: "{{ 'ChangeYourPassword1!' | password_hash('sha512') }}"
+      loop:
+        - wjwoo

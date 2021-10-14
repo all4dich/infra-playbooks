@@ -1,0 +1,22 @@
+---
+- name: Move User Home
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+      default: "all"
+    - name: username
+      prompt: "Set username"
+      private: no
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    - name: :"Change {{ username }}'s home directory as {{ new_home }}"
+      when: new_home is defined
+      ansible.builtin.user:
+        name: "{{ username }}"
+        move_home: yes
+        home: "{{ new_home }}"
+    - name: "{{ username }}'new_home variable is not define"
+      shell: "echo \"new_home variable is not defined\""
+      when: new_home is not defined

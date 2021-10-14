@@ -1,0 +1,10 @@
+all:
+  children:
+    mybox:
+      hosts:
+        10.169.1.87
+      vars:
+        ansible_user: ubuntu
+        ansible_password: ubuntu
+        ansible_become_password: ubuntu
+        ansible_python_interpreter: python3

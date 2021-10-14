@@ -1,0 +1,8 @@
+---
+- name: Check ufw rules
+  hosts: all
+  become: yes
+  tasks:
+    - name: Check ufw rules
+      ansible.builtin.shell: ufw status numbered
+
