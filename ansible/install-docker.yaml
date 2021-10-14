@@ -1,0 +1,64 @@
+---
+- name: Install Docker
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+        - software-properties-common
+        - python3-pip
+        - virtualenv
+        - python3-setuptools
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: name={{ item }} update_cache=yes state=latest
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: Add NVIDIA GPG apt Key
+      apt_key:
+        url: https://nvidia.github.io/nvidia-docker/gpgkey
+        state: present
+
+    - name: Add NVIDIA Repository
+      apt_repository:
+        repo: deb https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH) /
+        state: present
+
+    - name: Add NVIDIA Repository
+      apt_repository:
+        repo: deb https://nvidia.github.io/nvidia-container-runtime/stable/ubuntu18.04/$(ARCH) /
+        state: present
+
+    - name: Add NVIDIA Repository
+      apt_repository:
+        repo: deb https://nvidia.github.io/nvidia-docker/ubuntu18.04/$(ARCH) /
+        state: present
+
+    - name: Install nvidia docker 2
+      apt: name={{ item }} update_cache=yes state=latest
+      loop:
+        - nvidia-docker2
+
+    - name: Restart Docker service
+      ansible.builtin.service:
+        name: docker
+        state: restarted
