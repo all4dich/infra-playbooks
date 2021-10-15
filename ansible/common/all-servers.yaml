@@ -1,0 +1,46 @@
+all:
+  children:
+    gpu_10xx_20xx:
+      hosts:
+        love:
+          ansible_host: 143.248.251.96
+        wish:
+          ansible_host: 143.248.251.97
+        truth:
+          ansible_host: 143.248.251.88
+        honest:
+          ansible_host: 143.248.251.36
+        wisdom:
+          ansible_host: 143.248.251.89
+        beauty:
+          ansible_host: 143.248.251.111
+        sejong:
+          ansible_host: 143.248.251.115
+        galilei:
+          ansible_host: 143.248.251.116
+        hope:
+          ansible_host: 143.248.251.119
+        dasom:
+          ansible_host: 143.248.251.118
+      vars:
+        ansible_port: 2222
+        ansible_user: dev
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD_20xx") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD_20xx") }}'
+        ansible_python_interpreter: python3
+    gpu_3090:
+      hosts:
+        3090a:
+          ansible_host: 143.248.251.90
+        3090b:
+          ansible_host: 143.248.251.91
+        3090c:
+          ansible_host: 143.248.251.98
+        3090d:
+          ansible_host: 143.248.251.99
+      vars:
+        ansible_port: 2222
+        ansible_user: dev
+        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD_30xx") }}'
+        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD_30xx") }}'
+        ansible_python_interpreter: python3

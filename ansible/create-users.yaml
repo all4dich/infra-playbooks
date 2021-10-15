@@ -9,6 +9,7 @@
         shell: /bin/bash
         state: present
         groups: "users,docker"
+        append: yes
         password: "{{ 'ChangeYourPassword1!' | password_hash('sha512') }}"
       loop:
         - jhkim

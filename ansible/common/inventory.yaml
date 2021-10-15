@@ -7,8 +7,6 @@ all:
         3090c:
         3090d:
       vars:
-        ansible_port: 2222
-        ansible_user: dev
         ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
         ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
         ansible_python_interpreter: python3
