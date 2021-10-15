@@ -1,0 +1,31 @@
+---
+- name: Create User Account
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+    - name: user_name
+      prompt: "Set username"
+      private: no
+    - name: newpassword
+      prompt: "Set user's newpassword"
+      private: no
+      default: "ChangeYourPassword1@"
+    - name: user_shell
+      prompt: "Set user's shell"
+      private: no
+      default: "/bin/bash"
+  vars:
+    - user_home: "/home/{{  user_name }}"
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    - name: Create user account
+      ansible.builtin.user:
+        name: "{{ user_name }}"
+        password: "{{ newpassword | password_hash('sha512') }}"
+        state: present
+        shell: "{{ user_shell }}"
+        home: "{{ user_home }}"
+        groups: "users,docker"
+        append: yes
