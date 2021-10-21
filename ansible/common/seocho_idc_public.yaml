@@ -1,0 +1,18 @@
+all:
+  children:
+    seocho_idc_public:
+      hosts:
+        3090e:
+          ansible_host: 221.139.0.143
+        3090f:
+          ansible_host: 221.139.0.144
+        3090g:
+          ansible_host: 221.139.0.145
+        3090h:
+          ansible_host: 221.139.0.146
+      vars:
+        ansible_port: 2222
+        ansible_user: user
+        ansible_password: OWSUM7wEhW@
+        ansible_become_password: OWSUM7wEhW@
+        #ansible_python_interpreter: python3

@@ -1,0 +1,36 @@
+---
+- name: Install Development Environment
+  hosts: all
+  become: yes
+  tasks:
+    - name: Add NVIDIA GPG apt Key
+      apt_key:
+        url: https://nvidia.github.io/nvidia-docker/gpgkey
+        state: present
+
+    - name: Add NVIDIA Repository
+      apt_repository:
+        repo: deb https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH) /
+        state: present
+
+    - name: Add NVIDIA Repository
+      apt_repository:
+        repo: deb https://nvidia.github.io/nvidia-container-runtime/stable/ubuntu18.04/$(ARCH) /
+        state: present
+
+    - name: Add NVIDIA Repository
+      apt_repository:
+        repo: deb https://nvidia.github.io/nvidia-docker/ubuntu18.04/$(ARCH) /
+        state: present
+
+    - name: Install nvidia docker 2
+      apt:
+        pkg:
+          - nvidia-docker2
+        state: latest
+        update_cache: true
+
+    - name: Restart Docker service
+      ansible.builtin.service:
+        name: docker
+        state: restarted
