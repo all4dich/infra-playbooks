@@ -1,0 +1,10 @@
+all:
+  children:
+    mybox:
+      hosts:
+        192.168.56.104:
+      vars:
+        ansible_user: sunjoo
+        ansible_password: kuie1996
+        ansible_become_password: kuie1996
+        ansible_python_interpreter: python3
