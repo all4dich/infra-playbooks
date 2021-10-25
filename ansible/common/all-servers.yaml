@@ -47,13 +47,13 @@ all:
     seocho_idc_public:
       hosts:
         3090e:
-          ansible_host: 211.139.0.143
+          ansible_host: 221.139.0.143
         3090f:
-          ansible_host: 211.139.0.144
+          ansible_host: 221.139.0.144
         3090g:
-          ansible_host: 211.139.0.145
+          ansible_host: 221.139.0.145
         3090h:
-          ansible_host: 211.139.0.146
+          ansible_host: 221.139.0.146
       vars:
         ansible_port: 2222
         ansible_user: dev
