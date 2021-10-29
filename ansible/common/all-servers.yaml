@@ -2,18 +2,18 @@ all:
   children:
     gpu_10xx_20xx:
       hosts:
+        honest:
+          ansible_host: 143.248.251.36
+        truth:
+          ansible_host: 143.248.251.88
         love:
           ansible_host: 143.248.251.96
         wish:
           ansible_host: 143.248.251.97
-        truth:
-          ansible_host: 143.248.251.88
-        honest:
-          ansible_host: 143.248.251.36
-        wisdom:
-          ansible_host: 143.248.251.89
         beauty:
           ansible_host: 143.248.251.111
+        wisdom:
+          ansible_host: 143.248.251.89
         sejong:
           ansible_host: 143.248.251.115
         galilei:

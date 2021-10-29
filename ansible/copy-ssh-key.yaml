@@ -13,7 +13,6 @@
       private: no
       default: True
   hosts: "{{ target_host }}"
-  become: yes
   tasks:
     - name: Copy SSH Keys
       ansible.posix.authorized_key:
