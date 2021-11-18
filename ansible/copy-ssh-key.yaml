@@ -11,7 +11,7 @@
     - name: copy_mode
       prompt: "Copy an ssh key and remove other key contents on the remote(True/False)"
       private: no
-      default: True
+      default: False
   hosts: "{{ target_host }}"
   tasks:
     - name: Copy SSH Keys
