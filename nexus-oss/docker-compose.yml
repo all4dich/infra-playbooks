@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  nexus_service:
+    image: sonatype/nexus3:3.37.0
+    restart: "unless-stopped"
+    ports:
+      - 8081:8081
+      - 35000:35000
+      - 35001:35001
+      - 35002:35002
+      - 35003:35003
+    volumes:
+       - ${NEXUS_DATA:-/raid1/data/nota/nexus-oss}:/nexus-data
