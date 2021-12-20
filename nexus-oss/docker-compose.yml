@@ -11,4 +11,4 @@ services:
       - 35002:35002
       - 35003:35003
     volumes:
-       - ${NEXUS_DATA:-/raid1/data/nota/nexus-oss}:/nexus-data
+       - ${NEXUS_DATA}:/nexus-data

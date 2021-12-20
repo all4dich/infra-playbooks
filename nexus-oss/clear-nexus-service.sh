@@ -9,7 +9,11 @@ if ! command -v docker-compose; then
 else
   echo "INFO: $(command -v docker-compose)"
 fi
-export NEXUS_PERSISTENCE="/opt/nota/nexus-oss"
+export NEXUS_DATA=${1}
+if [ ! -d "${NEXUS_DATA}" ]; then
+  echo "ERROR: ${NEXUS_DATA} doesn't exist "
+  exit 1
+fi
 docker-compose down
-sudo rm -rf ${NEXUS_PERSISTENCE}
+sudo rm -rf ${NEXUS_DATA}
 set +x
