@@ -15,8 +15,11 @@
       prompt: "Set user's shell"
       private: no
       default: "/bin/bash"
-  vars:
-    - user_home: "/home/{{  user_name }}"
+    - name: user_home
+      prompt: "Set user home"
+      private: no
+#  vars:
+#    - user_home: "/home/{{  user_name }}"
   hosts: "{{ target_host }}"
   become: yes
   tasks:
