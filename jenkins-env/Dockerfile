@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.309
+FROM jenkins/jenkins:2.350
 USER root
 RUN apt-get update
 RUN apt-get install -y vim build-essential curl wget apt-transport-https \
@@ -12,4 +12,4 @@ RUN apt-get install -y vim build-essential curl wget apt-transport-https \
 #ADD  ./tools /usr/local/tools
 #RUN chmod +x /usr/local/tools/*
 USER jenkins
-RUN jenkins-plugin-cli --plugins "blueocean:1.24.7 docker-workflow:1.26"
+#RUN jenkins-plugin-cli --plugins "blueocean:1.24.7 docker-workflow:1.26"
