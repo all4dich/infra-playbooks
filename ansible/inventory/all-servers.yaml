@@ -1,8 +1,8 @@
 all:
   children:
-    gpu_10xx_20xx:
+    daejeon:
       hosts:
-        honest:
+        honest: # A100
           ansible_host: 10.169.20.100
         truth:
           ansible_host: 10.169.20.102
@@ -22,14 +22,6 @@ all:
           ansible_host: 10.169.20.108
         dasom:
           ansible_host: 10.169.20.109
-      vars:
-        ansible_port: 2222
-        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
-        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
-        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
-        ansible_python_interpreter: python3
-    gpu_3090:
-      hosts:
         3090a:
           ansible_host: 10.169.20.110
         3090b:
@@ -44,7 +36,7 @@ all:
         ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
         ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
         ansible_python_interpreter: python3
-    seocho_idc_public:
+    gabia:
       hosts:
         3090e:
           ansible_host: 221.139.0.143
@@ -60,31 +52,33 @@ all:
         ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
         ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
         ansible_python_interpreter: python3
-    seoul_gpu:
-      hosts:
-        3090i:
-          ansible_host: 10.169.10.17
-        3090j:
-          ansible_host: 10.169.10.18
-        3090k:
-          ansible_host: 10.169.10.19
-        3090l:
-          ansible_host: 10.169.10.20
-      vars:
-        ansible_port: 2222
-        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
-        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
-        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
-        ansible_python_interpreter: python3
-    seoul_workstation:
-      hosts:
-        adam:
-          ansible_host: 10.169.10.15
-        eve:
-          ansible_host: 10.169.10.14
-      vars:
-        ansible_port: 2222
-        ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
-        ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
-        ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
-        ansible_python_interpreter: python3
+    seoul:
+      children:
+        seoul_gpu:
+          hosts:
+            3090i:
+              ansible_host: 10.169.10.17
+            3090j:
+              ansible_host: 10.169.10.18
+            3090k:
+              ansible_host: 10.169.10.19
+            3090l:
+              ansible_host: 10.169.10.20
+          vars:
+            ansible_port: 2222
+            ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+            ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+            ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+            ansible_python_interpreter: python3
+        seoul_workstation:
+          hosts:
+            adam:
+              ansible_host: 10.169.10.15
+            eve:
+              ansible_host: 10.169.10.14
+          vars:
+            ansible_port: 2222
+            ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+            ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+            ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+            ansible_python_interpreter: python3
