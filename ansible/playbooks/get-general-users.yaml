@@ -1,6 +1,7 @@
 ---
 - name: Get all users except system account
   hosts: all
+  become: yes
   tasks:
     - name: Copy script to remote 
       ansible.builtin.copy:
@@ -22,6 +23,6 @@
   hosts: all
   serial: 1
   vars:
-    result_file: /tmp/output.csv
+    result_file: output.csv
   tasks:
     - local_action: lineinfile line={{ ps22.stdout }} dest={{ result_file }} create=yes
