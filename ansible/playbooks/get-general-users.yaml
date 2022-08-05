@@ -1,0 +1,27 @@
+---
+- name: Get all users except system account
+  hosts: all
+  tasks:
+    - name: Copy script to remote 
+      ansible.builtin.copy:
+        src: find-never-logged.sh
+        dest: /tmp/find-never-logged.sh
+    - name: Set permission
+      shell: chmod +x /tmp/find-never-logged.sh
+    - name: Get User List
+      shell: ls -l /tmp
+      register: ps
+    - name: Run Command
+      shell: /tmp/find-never-logged.sh
+      register: ps22
+      ignore_errors: true
+    #- debug: var=ps22stdout_lines
+    #- local_action: copy content={{ ps22.stdout }} dest=ps22_stdout_{{ inventory_hostname }}
+    #- local_action: copy content={{ ps22.stdout }} dest=ps22_stdout
+- name: Collect result
+  hosts: all
+  serial: 1
+  vars:
+    result_file: /tmp/output.csv
+  tasks:
+    - local_action: lineinfile line={{ ps22.stdout }} dest={{ result_file }} create=yes
