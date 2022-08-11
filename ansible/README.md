@@ -35,4 +35,8 @@ ansible-playbook -i inventory/all-servers.yaml \
 ```shell
 ansible-playbook -i inventory/all-servers.yaml playbooks/register-user-ssh-key.yaml --extra-vars "target_host=3090a target_user=sunjoo.park user_email=sunjoo.park@nota.ai"
 ```
+* Reset a password
+```shell
+ansible-playbook -i inventory/all-servers.yaml playbooks/reset-user-password.yaml --extra-vars "target_host=all target_user=sunjoo.park target_password=$(LC_CTYPE=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | head -c 10)"
+```
 
