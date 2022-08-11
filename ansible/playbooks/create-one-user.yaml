@@ -10,24 +10,19 @@
     - name: user_email
       prompt: "Set user email address"
       private: no
-    - name: newpassword
-      prompt: "Set user's newpassword"
-      private: no
-      default: "ChangeYourPassword1@"
-    - name: user_shell
-      prompt: "Set user's shell"
-      private: no
-      default: "/bin/bash"
     - name: user_home
       prompt: "Set user home"
       private: no
+  vars:
+    user_shell: "/bin/bash"
+    target_password: "ChangeYourPassword1@"
   hosts: "{{ target_host }}"
   become: yes
   tasks:
     - name: Create user account
       ansible.builtin.user:
         name: "{{ user_name }}"
-        password: "{{ newpassword | password_hash('sha512') }}"
+        password:  "{{ target_password| password_hash('sha512') }}"
         state: present
         shell: "{{ user_shell }}"
         home: "{{ user_home }}"
@@ -56,12 +51,16 @@
         sender: administrator@nota.ai
         subject: Your account '{{ user_name }} on {{ target_host }}' is  created
         body: |
-            An account  "{{ user_name }}" on "{{ target_host }}" is created.
+            An account  "{{ user_name }}" on "{{ target_host }}" is created. Its password is
+
+              * {{ target_password }}
+
             You can log onto {{ target_host }} with an attached private key file.
             Copy a file to $HOME/.ssh and change its permission as 0600
 
               $> chmod 0600 ~/.ssh/id_rsa
               $> ssh -p 2222 -i ~/.ssh/id_rsa {{ user_name }}@{{ ansible_default_ipv4.address }}
+            
         attach:
           - "{{ user_home }}/.ssh/id_rsa"
     - name: Download a key file
