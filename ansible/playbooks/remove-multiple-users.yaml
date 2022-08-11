@@ -1,0 +1,23 @@
+---
+- name: Remove User Account
+  hosts: wish
+  become: yes
+  tasks:
+    - name: Remove user account
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: absent
+        remove: yes
+      loop:
+        - jwhae
+        - skyeom
+        - hcpark
+        - mskim
+        - stkim
+        - jelim
+        - mschae89
+        - intern2021
+        - shkang
+        - hina
+        - we.hong
+        - chlee      
