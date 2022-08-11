@@ -1,0 +1,47 @@
+---
+- name: Register New SSH Key
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+    - name: target_user
+      prompt: "Set Username"
+      private: no
+    - name: user_email
+      prompt: "Set user email"
+      private: no
+  vars:
+    key_file_name: "new_ssh_key_file"
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    - name: Create new ssh key for a user
+      community.crypto.openssh_keypair:
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+        mode: 0600
+        path: "~{{ target_user }}/.ssh/{{ key_file_name }}"        
+    - name: Set authorized key
+      shell: su - {{ target_user }} bash -c 'cat ~{{ target_user }}/.ssh/{{ key_file_name }}.pub >> ~{{ target_user }}/.ssh/authorized_keys'
+    - name: Send a key file to a user
+      community.general.mail:
+        host: 10.169.10.12
+        port: 25
+        to: "{{ user_email }}" 
+        sender: administrator@nota.ai
+        subject: Your account '{{ target_user }} on {{ target_host }}' get a new ssh key
+        body: |
+            A new ssh public key is appened to ~{{ target_user }}/.ssh/authorized_keys
+
+            You can log onto {{ target_host }} with an attached private key file.
+            Copy a file to $HOME/.ssh and change its permission as 0600
+
+              $> chmod 0600 ~/.ssh/{{ key_file_name }}
+              $> ssh -p 2222 -i ~/.ssh/{{ key_file_name }} {{ target_user}}@{{ ansible_default_ipv4.address }}
+        attach:
+          - "~{{ target_user}}/.ssh/{{ key_file_name }}"
+    - name: Download a key file
+      fetch:
+        src: "~{{ target_user }}/.ssh/{{ key_file_name }}"
+        dest: ./{{ key_file_name }}_{{ target_user }}
+        flat: yes      

@@ -31,4 +31,8 @@ playbooks/remove-one-user.yaml
 ansible-playbook -i inventory/all-servers.yaml \
 --extra-vars "target_host=3090b target_user=soyul.park user_email=sunjoo.park@nota.ai target_password=$(LC_CTYPE=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | head -c 10)" playbooks/reset-user-password-and-key.yaml
 ```
+* Register a ssh key for user
+```shell
+ansible-playbook -i inventory/all-servers.yaml playbooks/register-user-ssh-key.yaml --extra-vars "target_host=3090a target_user=sunjoo.park user_email=sunjoo.park@nota.ai"
+```
 
