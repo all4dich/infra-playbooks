@@ -1,0 +1,25 @@
+---
+- name: Check SSH Key
+  hosts: all
+  become: yes
+  tasks:
+    - name: Copy script to remote 
+      ansible.builtin.copy:
+        src: check-ssh-key-registered.sh
+        dest: /tmp/check-ssh-key-registered.sh
+    - name: Set permission
+      shell: chmod +x /tmp/check-ssh-key-registered.sh
+    - name: Get User List
+      shell: ls -l /tmp
+      register: ps
+    - name: Run Command
+      shell: /tmp/check-ssh-key-registered.sh
+      register: ps22
+      ignore_errors: true
+- name: Collect result
+  hosts: all
+  serial: 1
+  vars:
+    result_file: output.csv
+  tasks:
+    - local_action: lineinfile line={{ ps22.stdout }} dest={{ result_file }} create=yes
