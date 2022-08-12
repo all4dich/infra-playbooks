@@ -68,4 +68,10 @@
         src: "{{ user_home }}/.ssh/id_rsa"
         dest: ./id_rsa_{{ user_name }}
         flat: yes
-
+    - name: Remove a key file on the server
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - ~{{ target_user }}/.ssh/id_rsa
+        - ~{{ target_user }}/.ssh/id_rsa.pub
