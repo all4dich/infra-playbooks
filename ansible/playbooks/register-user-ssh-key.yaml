@@ -32,7 +32,7 @@
       shell: su - {{ target_user }} bash -c 'cat ~{{ target_user }}/.ssh/{{ key_file_name }}.pub >> ~{{ target_user }}/.ssh/authorized_keys'
     - name: Send a key file to a user
       community.general.mail:
-        host: 10.169.10.12
+        host: 1.235.98.12
         port: 25
         to: "{{ user_email }}" 
         sender: administrator@nota.ai
