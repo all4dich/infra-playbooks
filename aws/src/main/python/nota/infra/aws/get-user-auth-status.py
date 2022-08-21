@@ -3,6 +3,20 @@ import pandas as pd
 import argparse
 import logging
 import os
+from datetime import datetime
+
+
+from botocore.exceptions import ClientError
+
+from email.mime.multipart import MIMEMultipart
+
+from email.mime.text import MIMEText
+
+from email.mime.application import MIMEApplication
+
+import urllib
+
+import os.path
 
 log_level: str = os.getenv("LOG_LEVEL", default="INFO")
 log_console_format = "[%(levelname)s] %(asctime)s - %(name)s - %(message)s (in %(pathname)s:%(lineno)d)"
@@ -13,6 +27,10 @@ logging.getLogger().setLevel(numeric_level)
 arg_parser = argparse.ArgumentParser()
 
 arg_parser.add_argument("--csv")
+arg_parser.add_argument("--aws_access_key")
+arg_parser.add_argument("--aws_secret_access_key")
+arg_parser.add_argument("--receiver")
+arg_parser.add_argument("--sender", default="netspresso@nota.ai")
 args = arg_parser.parse_args()
 
 iam_client = boto3.client('iam')
@@ -57,6 +75,48 @@ def get_user_access_list():
         pd.DataFrame(df_raw).to_csv(args.csv, index=False)
     else:
         print(pd.DataFrame(df_raw).to_csv(index=False))
+    if args.receiver:
+        ses_client = boto3.client('ses')
+        message = MIMEMultipart()
+        message['Subject'] = "List of IAM (nota-all) Users"
+        message['From'] = args.sender
+        message['To'] = args.receiver
+        part = MIMEText(pd.DataFrame(df_raw).to_html(), "html")
+        message.attach(part)
+
+        extension = "csv"
+        fileName = f"list-of-iam(nota-all)-users-{str(datetime.now()).split('.')[0]}." + extension
+        part = MIMEApplication(pd.DataFrame(df_raw).to_csv(index=False))
+        part.add_header('Content-Disposition', 'attachment', filename=fileName)
+        message.attach(part)
+        r = ses_client.send_raw_email(
+            Source=args.sender,
+            Destinations=[args.receiver],
+            RawMessage = {
+                "Data": message.as_string()
+            }
+        )
+        #r = ses_client.send_email(
+        #    Source="netspresso@nota.ai",
+        #    Destination={
+        #        "ToAddresses": [
+        #            "sunjoo.park@nota.ai"
+        #        ],
+        #    },
+        #    Message={
+        #        'Subject': {
+        #            'Data': 'Your Email',
+        #            'Charset': 'utf-8'
+        #        },
+        #        'Body': {
+        #            'Text': {
+        #                    'Data': 'string',
+        #                    'Charset': 'utf-8'
+        #                },
+        #        }
+        #    },
+        #)
+
     logging.info("Done")
 
 
