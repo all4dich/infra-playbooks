@@ -1,5 +1,19 @@
 import boto3
 import pandas as pd
+import argparse
+import logging
+import os
+
+log_level: str = os.getenv("LOG_LEVEL", default="INFO")
+log_console_format = "[%(levelname)s] %(asctime)s - %(name)s - %(message)s (in %(pathname)s:%(lineno)d)"
+logging.basicConfig(format=log_console_format, datefmt="%m/%d/%Y %I:%M:%S %p %Z")
+numeric_level = getattr(logging, log_level.upper(), None)
+logging.getLogger().setLevel(numeric_level)
+
+arg_parser = argparse.ArgumentParser()
+
+arg_parser.add_argument("--csv")
+args = arg_parser.parse_args()
 
 iam_client = boto3.client('iam')
 
@@ -38,7 +52,12 @@ def get_user_access_list():
         df_raw["password_last_used"].append(password_last_used)
         df_raw["last_key_used"].append(last_key_used)
         df_raw["last_key_date"].append(last_key_date)
-    pd.DataFrame(df_raw).to_csv("~/data.csv", index=False)
+    if args.csv:
+        logging.info(f"Output will be on {args.csv}")
+        pd.DataFrame(df_raw).to_csv(args.csv, index=False)
+    else:
+        print(pd.DataFrame(df_raw).to_csv(index=False))
+    logging.info("Done")
 
 
 if __name__ == "__main__":
