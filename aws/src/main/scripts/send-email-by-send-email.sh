@@ -1,0 +1,1 @@
+ aws ses send-email --text='test_message' --from netspresso@nota.ai --to sunjoo.park@nota.ai --subject "test message"
