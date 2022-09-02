@@ -1,0 +1,11 @@
+---
+- name: Update User Information
+  hosts: sunjoo-ubuntu
+  remote_user: {{ lookup('env', 'TARGET_USER') | default('ubuntu', True) }}
+  #become: yes
+  tasks:
+    - name: Run Command
+      ansible.builtin.command: id
+      register: output
+    - debug:
+        var: output.stdout
