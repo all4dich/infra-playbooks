@@ -35,7 +35,6 @@ args = arg_parser.parse_args()
 
 iam_client = boto3.client('iam')
 
-
 def get_access_key_last_used(UserName):
     """Get the last accessed key value and used date
 
