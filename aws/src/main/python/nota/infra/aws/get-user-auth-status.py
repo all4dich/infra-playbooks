@@ -37,6 +37,15 @@ iam_client = boto3.client('iam')
 
 
 def get_access_key_last_used(UserName):
+    """Get the last accessed key value and used date
+
+    arguments:
+    UserName -- AWS IAM Username
+
+    returns:
+    last_used_key -- Last used key value
+    last_used_date -- A date when a key was used
+    """
     user_keys = iam_client.list_access_keys(UserName=UserName)
     last_used_date = None
     last_used_key = None
@@ -52,6 +61,10 @@ def get_access_key_last_used(UserName):
 
 
 def get_user_access_list():
+    """Get a list of users with the last used key information
+
+    The result will be sent to a user by email(Use AWS SES, boto3 client)
+    """
     all_users = iam_client.list_users()['Users']
     df_raw = {"user_name": [],
               "password_last_used": [],
