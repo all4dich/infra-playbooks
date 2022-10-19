@@ -105,15 +105,19 @@ def get_user_access_list():
         message['Subject'] = "List of IAM (nota-all) Users"
         message['From'] = args.sender
         message['To'] = args.receiver
-        part = MIMEText(
-            pd.DataFrame(df_raw).to_html() + "\n\n" + pd.DataFrame(df_raw_keys).to_html(), "html")
-        message.attach(part)
+        body_content = MIMEText(
+            pd.DataFrame(df_raw).to_html() + "\n<br/><br/>\n" + pd.DataFrame(df_raw_keys).to_html(), "html")
+        message.attach(body_content)
 
         extension = "csv"
         fileName = f"list-of-iam(nota-all)-users-{str(datetime.now()).split('.')[0]}." + extension
-        part = MIMEApplication(pd.DataFrame(df_raw).to_csv(index=False))
-        part.add_header('Content-Disposition', 'attachment', filename=fileName)
-        message.attach(part)
+        fileName_2 = f"list-of-iam(nota-all)-users-with-keys-{str(datetime.now()).split('.')[0]}." + extension
+        part_attach_last_info = MIMEApplication(pd.DataFrame(df_raw).to_csv(index=False))
+        part_attach_last_info.add_header('Content-Disposition', 'attachment', filename=fileName)
+        part_attach_all_keys = MIMEApplication(pd.DataFrame(df_raw_keys).to_csv(index=False))
+        part_attach_all_keys.add_header('Content-Disposition', 'attachment', filename=fileName_2)
+        message.attach(part_attach_last_info)
+        message.attach(part_attach_all_keys)
         r = ses_client.send_raw_email(
             Source=args.sender,
             Destinations=[args.receiver],
