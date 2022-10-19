@@ -35,60 +35,89 @@ args = arg_parser.parse_args()
 
 iam_client = boto3.client('iam')
 
-
 def get_access_key_last_used(UserName):
+    """Get the last accessed key value and used date
+
+    arguments:
+    UserName -- AWS IAM Username
+
+    returns:
+    last_used_key -- Last used key value
+    last_used_date -- A date when a key was used
+    """
     user_keys = iam_client.list_access_keys(UserName=UserName)
     last_used_date = None
     last_used_key = None
+    all_keys = []
     for each_key in user_keys['AccessKeyMetadata']:
         access_key_id = each_key['AccessKeyId']
         last_accessed_info = iam_client.get_access_key_last_used(AccessKeyId=access_key_id)
         if 'LastUsedDate' in last_accessed_info['AccessKeyLastUsed']:
             used_data = last_accessed_info['AccessKeyLastUsed']['LastUsedDate']
+            all_keys.append({"UserName": UserName, "AccessKeyId": access_key_id, "AccessKeyLastUsed": used_data})
             if last_used_date is None or last_used_date < used_data:
                 last_used_date = used_data
                 last_used_key = access_key_id
-    return last_used_key, last_used_date
+    return last_used_key, last_used_date, all_keys
 
 
 def get_user_access_list():
+    """Get a list of users with the last used key information
+
+    The result will be sent to a user by email(Use AWS SES, boto3 client)
+    """
     all_users = iam_client.list_users()['Users']
     df_raw = {"user_name": [],
               "password_last_used": [],
               "last_key_used": [],
               "last_key_date": [],
               }
+    df_raw_keys = {"user_name": [],
+              "access_key": [],
+              "last_used_date": [],
+              }
     i = 0
+    all_keys = []
     for each_user in all_users:
         user_name = each_user['UserName']
         user_id = each_user['UserId']
         password_last_used = None
         if 'PasswordLastUsed' in each_user:
             password_last_used = each_user['PasswordLastUsed']
-        last_key_used, last_key_date = get_access_key_last_used(user_name)
+        last_key_used, last_key_date, user_keys = get_access_key_last_used(user_name)
         df_raw["user_name"].append(user_name)
         df_raw["password_last_used"].append(password_last_used)
         df_raw["last_key_used"].append(last_key_used)
         df_raw["last_key_date"].append(last_key_date)
+        for each_key in user_keys:
+            df_raw_keys["user_name"].append(each_key["UserName"])
+            df_raw_keys["access_key"].append(each_key["AccessKeyId"])
+            df_raw_keys["last_used_date"].append(each_key["AccessKeyLastUsed"])
     if args.csv:
         logging.info(f"Output will be on {args.csv}")
         pd.DataFrame(df_raw).to_csv(args.csv, index=False)
     else:
         print(pd.DataFrame(df_raw).to_csv(index=False))
+        print(pd.DataFrame(df_raw_keys).to_csv(index=False))
     if args.receiver:
         ses_client = boto3.client('ses')
         message = MIMEMultipart()
         message['Subject'] = "List of IAM (nota-all) Users"
         message['From'] = args.sender
         message['To'] = args.receiver
-        part = MIMEText(pd.DataFrame(df_raw).to_html(), "html")
-        message.attach(part)
+        body_content = MIMEText(
+            pd.DataFrame(df_raw).to_html() + "\n<br/><br/>\n" + pd.DataFrame(df_raw_keys).to_html(), "html")
+        message.attach(body_content)
 
         extension = "csv"
         fileName = f"list-of-iam(nota-all)-users-{str(datetime.now()).split('.')[0]}." + extension
-        part = MIMEApplication(pd.DataFrame(df_raw).to_csv(index=False))
-        part.add_header('Content-Disposition', 'attachment', filename=fileName)
-        message.attach(part)
+        fileName_2 = f"list-of-iam(nota-all)-users-with-keys-{str(datetime.now()).split('.')[0]}." + extension
+        part_attach_last_info = MIMEApplication(pd.DataFrame(df_raw).to_csv(index=False))
+        part_attach_last_info.add_header('Content-Disposition', 'attachment', filename=fileName)
+        part_attach_all_keys = MIMEApplication(pd.DataFrame(df_raw_keys).to_csv(index=False))
+        part_attach_all_keys.add_header('Content-Disposition', 'attachment', filename=fileName_2)
+        message.attach(part_attach_last_info)
+        message.attach(part_attach_all_keys)
         r = ses_client.send_raw_email(
             Source=args.sender,
             Destinations=[args.receiver],
@@ -96,27 +125,6 @@ def get_user_access_list():
                 "Data": message.as_string()
             }
         )
-        #r = ses_client.send_email(
-        #    Source="netspresso@nota.ai",
-        #    Destination={
-        #        "ToAddresses": [
-        #            "sunjoo.park@nota.ai"
-        #        ],
-        #    },
-        #    Message={
-        #        'Subject': {
-        #            'Data': 'Your Email',
-        #            'Charset': 'utf-8'
-        #        },
-        #        'Body': {
-        #            'Text': {
-        #                    'Data': 'string',
-        #                    'Charset': 'utf-8'
-        #                },
-        #        }
-        #    },
-        #)
-
     logging.info("Done")
 
 

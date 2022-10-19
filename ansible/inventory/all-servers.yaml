@@ -52,6 +52,8 @@ all:
               ansible_host: 10.169.10.19
             3090l:
               ansible_host: 10.169.10.20
+            argus:
+              ansible_host: 10.169.10.12
           vars:
             ansible_port: 2222
             ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
