@@ -1,0 +1,12 @@
+all:
+  children:
+    hai:
+      hosts:
+        notaface:
+          ansible_host: 10.169.1.103
+  vars:
+    ansible_port: 22
+    ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
+    ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'
+    ansible_become_password: '{{ lookup("env", "ANSIBLE_BECOME_PASSWORD") }}'
+    ansible_python_interpreter: python3

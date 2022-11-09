@@ -35,13 +35,13 @@ all:
     gabia:
       hosts:
         3090e:
-          ansible_host: 221.139.0.143
+          ansible_host: 10.169.20.115
         3090f:
-          ansible_host: 221.139.0.144
+          ansible_host: 10.169.20.116
         3090g:
           ansible_host: 10.169.20.117
         3090h:
-          ansible_host: 221.139.0.146
+          ansible_host: 10.169.20.118
     seoul:
       children:
         seoul_gpu:
