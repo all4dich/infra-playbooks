@@ -32,7 +32,7 @@
   vars:
     result_file: users-on-servers.csv
   tasks:
-    - name: Preapre
+    - name: Prepare
       local_action: lineinfile line="host,user,connec_info" dest={{ result_file }} create=yes
       run_once: True
     - local_action: lineinfile line={{ ps22.stdout }} dest={{ result_file }} create=yes
@@ -48,7 +48,7 @@
         port: 25
         username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
         password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
-        from: Netpresso<netspresso@nota.ai>
+        from: NetsPresso<netspresso@nota.ai>
         to: Sunjoo Park<sunjoo.park@nota.ai>
         subject: User List on server
         body: show an attached file
