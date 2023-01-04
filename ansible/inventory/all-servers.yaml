@@ -30,6 +30,8 @@ all:
           ansible_host: 10.169.20.112
         3090d:
           ansible_host: 10.169.20.113
+        3090m:
+          ansible_host: 10.169.20.120
     gabia:
       hosts:
         3090e:
@@ -37,7 +39,7 @@ all:
         3090f:
           ansible_host: 221.139.0.144
         3090g:
-          ansible_host: 221.139.0.145
+          ansible_host: 10.169.20.117
         3090h:
           ansible_host: 221.139.0.146
     seoul:
