@@ -1,0 +1,57 @@
+---
+- name: Change home directory permission
+  hosts: all
+  become: yes
+  vars:
+    script_file: change-home-directory-permission.sh
+  tasks:
+    - name: Copy script to remote 
+      ansible.builtin.copy:
+        src: change-home-directory-permission.sh
+        dest: /tmp/change-home-directory-permission.sh
+    - name: Set permission
+      shell: chmod +x /tmp/change-home-directory-permission.sh
+    - name: Check file existence
+      shell: ls -l /tmp
+      register: ps
+    - name: Run Command
+      shell: /tmp/change-home-directory-permission.sh
+      register: ps22
+      ignore_errors: true
+- name: Remove old files
+  hosts: localhost
+  connection: local
+  vars:
+    result_file: result.csv
+  tasks:
+    - command: rm -rf {{ result_file }}
+      run_once: True
+- name: Collect result
+  hosts: all
+  serial: 1
+  vars:
+    result_file: result.csv
+  tasks:
+    - name: Prepare
+      local_action: lineinfile line="host,user,permission" dest={{ result_file }} create=yes
+      run_once: True
+    - local_action: lineinfile line={{ ps22.stdout }} dest={{ result_file }} create=yes
+- name: Send a mail to Admin
+  hosts: localhost
+  connection: local
+  vars:
+    result_file: result.csv
+  tasks:
+    - local_action:
+        module: community.general.mail
+        host: email-smtp.ap-northeast-2.amazonaws.com
+        port: 25
+        username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
+        password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
+        from: NetsPresso<netspresso@nota.ai>
+        to: Sunjoo Park<sunjoo.park@nota.ai>
+        subject: User List on server
+        body: show an attached file
+        attach:
+          - "{{ result_file }}"
+      run_once: True
