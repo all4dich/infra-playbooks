@@ -14,4 +14,4 @@
       ansible.builtin.user:
         name: "{{ user_name }}"
         state: absent
-        remove: yes
+        remove: false
