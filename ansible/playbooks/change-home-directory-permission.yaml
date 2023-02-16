@@ -44,8 +44,8 @@
   tasks:
     - local_action:
         module: community.general.mail
-        host: email-smtp.ap-northeast-2.amazonaws.com
-        port: 25
+        host: "{{ lookup('ansible.builtin.env', 'SMTP_HOST') }}"
+        port: "{{ lookup('ansible.builtin.env', 'SMTP_PORT')|default('587')|int }}"
         username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
         password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
         from: NetsPresso<netspresso@nota.ai>

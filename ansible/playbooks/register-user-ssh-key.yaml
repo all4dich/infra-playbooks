@@ -12,6 +12,7 @@
       private: no
   vars:
     key_file_name: "new_ssh_key_file"
+    email_sender: "administrator@nota.ai"
   hosts: "{{ target_host }}"
   become: yes
   tasks:
@@ -32,10 +33,12 @@
       shell: su - {{ target_user }} bash -c 'cat ~{{ target_user }}/.ssh/{{ key_file_name }}.pub >> ~{{ target_user }}/.ssh/authorized_keys'
     - name: Send a key file to a user
       community.general.mail:
-        host: 1.235.98.12
-        port: 25
+        host: "{{ lookup('ansible.builtin.env', 'SMTP_HOST') }}"
+        username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
+        password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
+        port: "{{ lookup('ansible.builtin.env', 'SMTP_PORT')|default('587')|int }}"
         to: "{{ user_email }}" 
-        sender: administrator@nota.ai
+        sender: "{{ email_sender }}"
         subject: Your account '{{ target_user }} on {{ target_host }}' get a new ssh key
         body: |
             A new ssh public key is appened to ~{{ target_user }}/.ssh/authorized_keys
