@@ -16,6 +16,10 @@
   vars:
     user_shell: "/bin/bash"
     target_password: "ChangeYourPassword1@"
+    email_sender: "administrator@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
   hosts: "{{ target_host }}"
   become: yes
   tasks:
@@ -45,10 +49,12 @@
       shell: su - {{ target_user }} bash -c 'cat {{ user_home }}/.ssh/id_rsa.pub > {{ user_home }}/.ssh/authorized_keys'
     - name: Send a key file to a user
       community.general.mail:
-        host: 1.235.98.12
-        port: 25
+        host: "{{ smtp_host }}"
+        port: "{{ lookup('ansible.builtin.env', 'SMTP_PORT')|default('587')|int }}"
+        username: "{{ smtp_username }}"
+        password: "{{ smtp_password }}"        
         to: "{{ user_email }}" 
-        sender: administrator@nota.ai
+        sender: "{{ email_sender }}"
         subject: Your account '{{ target_user }} on {{ target_host }}' is  created
         body: |
             An account  "{{ target_user }}" on "{{ target_host }}" is created. Its password is

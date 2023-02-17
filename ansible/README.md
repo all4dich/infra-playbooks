@@ -7,7 +7,11 @@ This file shows how you can use Nota ansible playbooks to manage company infrast
 export ANSIBLE_USERNAME=dev
 export ANSIBLE_PASSWORD=xxxxxxxxxxxxxx
 export ANSIBLE_BECOME_PASSWORD=xxxxxxxxxxxxxxxxx
+export SMTP_USERNAME=xxxxxxxxxxxxxxxxxxxxx
+export SMTP_PASSWORD=xxxxxxxxxxxxxxxxxxxxxxx
+export SMTP_HOST=email-smtp.ap-northeast-2.amazonaws.com
 ```
+Some scripts send a mail to a user for let a user know the result. Emails will be delivered to a user via Amazon SES.
 ## Server Management
 ### User Management
 * Create a one user. A user will be received a mail that have user password and new ssh private key.

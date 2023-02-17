@@ -1,0 +1,23 @@
+---
+- name: Email test
+  hosts: 3090d
+  become: yes
+  vars:
+    user_email: "sunjoo.park@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
+  tasks:
+    - name: Send a key file to a user
+      community.general.mail:
+        host: "{{ smtp_host }}"
+        port: "{{ lookup('ansible.builtin.env', 'SMTP_PORT')|default('587')|int }}"
+        username: "{{ smtp_username }}"
+        password: "{{ smtp_password }}"
+        to: "{{ user_email }}"
+        sender: administrator@nota.ai
+        subject: test email from sunjoo - sent from US-WEST-2
+        body: |
+          message line 1
+          message line 
+          message line 4
