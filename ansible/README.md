@@ -14,27 +14,29 @@ export SMTP_HOST=email-smtp.ap-northeast-2.amazonaws.com
 Some scripts send a mail to a user for let a user know the result. Emails will be delivered to a user via Amazon SES.
 ## Server Management
 ### User Management
+#### Create User Account
 * Create a one user. A user will be received a mail that have user password and new ssh private key.
 ```shell
-ansible-playbook -i inventory/all-servers.yaml \
---extra-vars "target_password=$(LC_ALL=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | head -c 10)" \
-playbooks/create-one-user.yaml
+ansible-playbook -i inventory/all-servers.yaml playbooks/create-one-user.yaml
 ```
 * Create a one user without any interactions.  A user will be received a mail that have user password and new ssh private key. 
 ```shell
 ansible-playbook -i inventory/all-servers.yaml \
---extra-vars "target_host=3090b user_name=soyul.park user_email=sunjoo.park@nota.ai user_home=/ssd1/soyul.park target_password=$(LC_CTYPE=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | head -c 10) "  playbooks/create-one-user.yaml
+--extra-vars "target_host=3090b user_name=soyul.park user_email=sunjoo.park@nota.ai user_home=/ssd1/soyul.park"  \
+playbooks/create-one-user.yaml
 ```
+If you set 'all' for target_host, all servers that are described on 'inventory/all-servers' will create an account with same password and key file.
+#### Update an account information
 * Remove a one user from the host
 ```shell
-ansible-playbook -i inventory/all-servers.yaml --extra-vars "target_host=3090b user_name=soyul.park" \
-playbooks/remove-one-user.yaml
+ansible-playbook -i inventory/all-servers.yaml --extra-vars "target_host=3090b user_name=soyul.park" playbooks/remove-one-user.yaml
 ```
 * Reset a password and register a new ssh key
 ```shell
 ansible-playbook -i inventory/all-servers.yaml \
---extra-vars "target_host=3090b target_user=soyul.park user_email=sunjoo.park@nota.ai target_password=$(LC_CTYPE=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | head -c 10)" playbooks/reset-user-password-and-key.yaml
+--extra-vars "target_host=3090b target_user=soyul.park user_email=sunjoo.park@nota.ai" playbooks/reset-user-password-and-key.yaml
 ```
+If you set 'all' for target_host, an account on each server will use saame password and key file.
 * Register a ssh key for user
 ```shell
 ansible-playbook -i inventory/all-servers.yaml playbooks/register-user-ssh-key.yaml --extra-vars "target_host=3090a target_user=sunjoo.park user_email=sunjoo.park@nota.ai"
