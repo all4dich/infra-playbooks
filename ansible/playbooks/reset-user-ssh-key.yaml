@@ -49,7 +49,7 @@
         mode: 0700
     - name: Set authorized key
       become: true
-      shell: su - {{ target_user }} bash -c 'cat ~{{ target_user }}/.ssh/{{ key_file_name }}.pub >> ~{{ target_user }}/.ssh/authorized_keys'
+      shell: su - {{ target_user }} bash -c 'cat ~{{ target_user }}/.ssh/{{ key_file_name }}.pub > ~{{ target_user }}/.ssh/authorized_keys'
     - name: Send a key file to a user
       delegate_to: localhost
       run_once: true
