@@ -1,2 +1,4 @@
-boto3
-pandas
+boto3~=1.18.42
+pandas~=1.2.5
+botocore~=1.24.6
+requests~=2.26.0
