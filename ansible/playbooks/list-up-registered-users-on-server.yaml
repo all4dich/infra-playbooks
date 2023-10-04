@@ -49,7 +49,7 @@
         username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
         password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
         from: NetsPresso<netspresso@nota.ai>
-        to: Sunjoo Park<sunjoo.park@nota.ai>
+        to: Hyeonho Sin<hyeonho.sin@nota.ai>
         subject: User List on server
         body: show an attached file
         attach:
