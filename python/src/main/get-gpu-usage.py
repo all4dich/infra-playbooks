@@ -35,8 +35,8 @@ arg_parser.add_argument("--step", default="5m", help="Step time for prometheus q
 arg_parser.add_argument("--delete_temp_file", action="store_true", default=True, help="Delete temporary files")
 arg_parser.add_argument("--smtp_host", default="email-smtp.ap-northeast-2.amazonaws.com", help="SMTP host")
 arg_parser.add_argument("--smtp_port", default=587, type=int, help="SMTP port")
+arg_parser.add_argument("--gpu-assigned-table", help="GPU assigned table")
 args = arg_parser.parse_args()
-
 server_url = args.prometheus_url
 metric_name = args.metric
 
@@ -53,7 +53,15 @@ def get_usage_data(start_date, end_date, step="5m"):
 
 def write_to_file(data):
     column_names = ['hostname', 'gpu model', 'gpu id', 'check time', 'year', 'month', 'day', 'week', 'utilization',
-                    'is_used']
+                    'is_used', 'team', 'part', 'person']
+    gpu_assign_dict = {}
+    if args.gpu_assigned_table:
+        with open(args.gpu_assigned_table, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            gpu_assign_list = list(reader)
+        # Convert the list to a dictionary
+        for row in gpu_assign_list:
+            gpu_assign_dict[row['Host'].lower() + '-' + row['GPU_id']] = row
     with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as output:
         csv_writer = csv.DictWriter(output, fieldnames=column_names)
         csv_writer.writeheader()
@@ -63,6 +71,15 @@ def write_to_file(data):
                 model_name = a['metric']['modelName']
                 gpu_id = a['metric']['gpu']
                 values = a['values']
+                team = ""
+                part = ""
+                person = ""
+                if args.gpu_assigned_table:
+                    if hostname.lower() + '-' + gpu_id in gpu_assign_dict:
+                        team = gpu_assign_dict[hostname.lower() + '-' + gpu_id]['Team']
+                        part = gpu_assign_dict[hostname.lower() + '-' + gpu_id]['Part']
+                        person = gpu_assign_dict[hostname.lower() + '-' + gpu_id]['Person']
+
                 for i in values:
                     check_time = datetime.fromtimestamp(i[0])
                     metric_value = int(i[1])
@@ -71,7 +88,8 @@ def write_to_file(data):
                         'hostname': hostname, 'gpu model': model_name, 'gpu id': gpu_id, 'check time': check_time,
                         'year': check_time.year, 'month': check_time.month, 'day': check_time.day,
                         'week': check_time.strftime("%V"),
-                        'utilization': metric_value, 'is_used': is_used
+                        'utilization': metric_value, 'is_used': is_used,
+                        'team': team, 'part': part, 'person': person
                     })
             except KeyError as e:
                 logging.error(e)
