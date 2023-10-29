@@ -29,8 +29,30 @@ args = arg_parser.parse_args()
 
 yesterday = datetime.today()
 
+# EC2 Unit price Info
+ec2_unit_price = {
+    "t2.medium": 0.0576,
+    "t2.2xlarge": 0.4608,
+    "c5.18xlarge": 3.456,
+    "c5.4xlarge": 0.768,
+    "c5.large": 0.096,
+    "g4dn.xlarge": 0.647,
+    "m4.2xlarge": 0.492,
+    "m4.large": 0.123,
+    "m5.2xlarge": 0.472,
+    "m5.4xlarge": 0.944,
+    "m5.8xlarge": 1.888,
+    "m5.large": 0.118,
+    "p3.2xlarge": 4.234,
+    "p3.8xlarge": 16.936,
+    "t2.2xlarge": 0.4608,
+    "t2.medium": 0.0576,
+    "t2.xlarge": 0.2304,
+    "t3.medium": 0.052,
+    "t3.xlarge": 0.208,
+    "t4g.xlarge": 0.1664
+}
 
-# Create a function to solve hanoi problem.
 
 def get_events(instance_data):
     instance_id = instance_data['id']
@@ -144,6 +166,7 @@ def main():
     for instance in ec2_client.instances.all():
         instance_state = instance.state['Name']
         instance_type = instance.instance_type
+        unit_price = ec2_unit_price[instance_type]
         instance_info = get_instance_type_info(instance_type)
         instance_volumes = instance.volumes.all()
         last_launch_time = instance.launch_time
@@ -153,9 +176,9 @@ def main():
                 instance_ids.append(
                     {"id": str(instance.id), "state": instance_state, "name": instance_name,
                      "launch_time": last_launch_time,
-                     "instance_type": instance_type, "memory": instance_info['mem_size'],
+                     "instance_type": instance_type, "unit_price": unit_price, "memory": instance_info['mem_size'],
                      "cores": instance_info['vcpus'],
-                     "volume_id": volume.id, "volume_size": volume.size})
+                     "volume_id": volume.id, "volume_size": volume.size, "montly_cost(USD)": unit_price * 24 * 30})
 
     usage_info = []
     for i in instance_ids:
@@ -163,15 +186,17 @@ def main():
 
     # Sort instances by last launch time
     output = io.StringIO()
-    column_names = ['id', 'state', 'name', 'launch_time', 'instance_type', 'memory', 'cores', 'volume_id',
-                    'volume_size']
+    column_names = ['id', 'state', 'name', 'launch_time', 'instance_type', 'unit_price', 'memory', 'cores', 'volume_id',
+                    'volume_size', 'montly_cost(USD)']
     writer = csv.DictWriter(output, fieldnames=column_names)
     writer.writeheader()
     for usage in instance_ids:
         writer.writerow(
             {"id": usage['id'], "state": usage['state'], "name": usage['name'], "launch_time": usage['launch_time'],
-             "instance_type": usage['instance_type'], "memory": usage['memory'], "cores": usage['cores'],
-             "volume_id": usage['volume_id'], "volume_size": usage['volume_size']})
+             "instance_type": usage['instance_type'], "unit_price": usage['unit_price'], "memory": usage['memory'],
+             "cores": usage['cores'],
+             "volume_id": usage['volume_id'], "volume_size": usage['volume_size'],
+             "montly_cost(USD)": usage['montly_cost(USD)']})
     # print(output.getvalue())
     filename = args.filename
     with open(filename, 'w') as csvfile:
