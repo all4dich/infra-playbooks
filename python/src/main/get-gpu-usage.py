@@ -47,6 +47,8 @@ args = arg_parser.parse_args()
 server_url = args.prometheus_url
 metric_name = args.metric
 
+gpu_assign_list_new = []
+gpu_assign_list_new_key = ['gpu_id', 'hostname', 'team', 'part', 'person', 'gpu_key']
 
 def get_usage_data(start_date, end_date, step="5m"):
     start = datetime.strptime(start_date, datetime_format)
@@ -59,16 +61,20 @@ def get_usage_data(start_date, end_date, step="5m"):
 
 
 def write_to_file(data):
-    column_names = ['hostname', 'gpu model', 'gpu id', 'check time', 'year', 'month', 'day', 'week', 'utilization',
+    column_names = ['hostname', 'gpu model', 'gpu id', 'gpu_uuid', 'check time', 'year', 'month', 'day', 'week', 'utilization',
                     'is_used', 'team', 'part', 'person']
     gpu_assign_dict = {}
+    gpu_assign_list = {}
     if args.gpu_assigned_table:
         with open(args.gpu_assigned_table, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             gpu_assign_list = list(reader)
         # Convert the list to a dictionary
         for row in gpu_assign_list:
+            gpu_key = row['Host'].lower() + '-' + row['GPU_id']
             gpu_assign_dict[row['Host'].lower() + '-' + row['GPU_id']] = row
+            row['gpu_key'] = gpu_key
+            gpu_assign_list_new.append([row['GPU_id'], row['Host'], row['Team'], row['Part'], row['Person'], row['gpu_key']])
     with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as output:
         csv_writer = csv.DictWriter(output, fieldnames=column_names)
         csv_writer.writeheader()
@@ -77,6 +83,7 @@ def write_to_file(data):
                 hostname = a['metric']['Hostname']
                 model_name = a['metric']['modelName']
                 gpu_id = a['metric']['gpu']
+                gpu_uuid = a['metric']['UUID']
                 values = a['values']
                 team = ""
                 part = ""
@@ -92,7 +99,7 @@ def write_to_file(data):
                     metric_value = int(i[1])
                     is_used = 1 if metric_value > 0 else 0
                     csv_writer.writerow({
-                        'hostname': hostname, 'gpu model': model_name, 'gpu id': gpu_id, 'check time': check_time,
+                        'hostname': hostname, 'gpu model': model_name, 'gpu id': gpu_id, 'gpu_uuid': gpu_uuid, 'check time': check_time,
                         'year': check_time.year, 'month': check_time.month, 'day': check_time.day,
                         'week': check_time.strftime("%V"),
                         'utilization': metric_value, 'is_used': is_used,
@@ -122,14 +129,28 @@ if __name__ == "__main__":
     # Convert csv file to pandas dataframe
     df = pd.read_csv(file_name)
     # Create pivot table
-    pivot = df.pivot_table(index=args.pivot_index.split(","), columns=args.pivot_columns.split(","), values=args.pivot_values.split(","), aggfunc=args.pivot_aggfunc)
+    target_index = args.pivot_index.split(",") if args.pivot_index else None
+    target_columns = args.pivot_columns.split(",") if args.pivot_columns else None
+    target_values = args.pivot_values.split(",") if args.pivot_values else None
+    pivot = df.pivot_table(index=target_index, columns=target_columns, values=target_values, aggfunc=args.pivot_aggfunc)
+    logging.info("Usage Pivot Table")
     logging.info(pivot)
+    start = datetime.strptime(args.start_time, datetime_format)
+    end = datetime.strptime(args.end_time, datetime_format)
+    #slot_number = int((end - start).total_seconds() / 300)
+    slot_number = (timedelta(weeks=1).total_seconds()/ 300)
+    #pivot_index_count = df.pivot_table(index=target_index, columns=target_columns, values=target_values, aggfunc=lambda x: int(len(x.unique()) * slot_number))
+    df_count = pd.DataFrame(gpu_assign_list_new, columns=gpu_assign_list_new_key)
+    pivot_index_count = df_count.pivot_table(index=['team', 'part', 'person'], columns="hostname", values="gpu_key", aggfunc=lambda x: int(len(x.unique())) * slot_number)
+
     # Write pivot table to excel file
     temp_dir = tempfile.TemporaryDirectory()
     os.system("mkdir -p " + temp_dir.name)
     temp_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-table.xlsx")
+    temp_pivot_count_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-count.xlsx")
     logging.info("Write a pivot table to " + temp_file_path)
     pivot.to_excel(temp_file_path)
+    pivot_index_count.to_excel(temp_pivot_count_file_path)
 
     CHARSET = "UTF-8"
     msg = MIMEMultipart()
@@ -155,6 +176,13 @@ if __name__ == "__main__":
                         filename=args.end_time + "-pivot-table.xlsx")
         msg.attach(part2)
 
+    with open(temp_pivot_count_file_path, "rb") as attachment3:
+        part3 = MIMEApplication(attachment3.read())
+        part3.add_header("Content-Disposition",
+                        "attachment",
+                        filename=args.end_time + "-pivot-count.xlsx")
+        msg.attach(part3)
+
     # Send email to sender by smtplib
     try:
         logging.info("Send email to " + args.receiver + " by smtplib")
@@ -171,4 +199,6 @@ if __name__ == "__main__":
         logging.info("Delete temporary files")
         os.remove(file_name)
         os.remove(file_name_zip)
+    logging.info("Assigned Datal")
+    logging.info(pivot_index_count)
     logging.info("Done")
