@@ -12,6 +12,7 @@ import boto3
 import zipfile
 import tempfile
 import smtplib
+import pandas as pd
 
 datetime_format = "%Y-%m-%d %H:%M:%S %Z"
 log_level: str = os.getenv("LOG_LEVEL", default="INFO")
@@ -35,8 +36,14 @@ arg_parser.add_argument("--step", default="5m", help="Step time for prometheus q
 arg_parser.add_argument("--delete_temp_file", action="store_true", default=True, help="Delete temporary files")
 arg_parser.add_argument("--smtp_host", default="email-smtp.ap-northeast-2.amazonaws.com", help="SMTP host")
 arg_parser.add_argument("--smtp_port", default=587, type=int, help="SMTP port")
-args = arg_parser.parse_args()
+arg_parser.add_argument("--gpu-assigned-table", help="GPU assigned table")
+arg_parser.add_argument("--pivot-index", default="week,team,part,person")
+arg_parser.add_argument("--pivot-columns", default="hostname")
+arg_parser.add_argument("--pivot-values", default="is_used")
+arg_parser.add_argument("--pivot-aggfunc", default="sum")
 
+
+args = arg_parser.parse_args()
 server_url = args.prometheus_url
 metric_name = args.metric
 
@@ -53,7 +60,15 @@ def get_usage_data(start_date, end_date, step="5m"):
 
 def write_to_file(data):
     column_names = ['hostname', 'gpu model', 'gpu id', 'check time', 'year', 'month', 'day', 'week', 'utilization',
-                    'is_used']
+                    'is_used', 'team', 'part', 'person']
+    gpu_assign_dict = {}
+    if args.gpu_assigned_table:
+        with open(args.gpu_assigned_table, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            gpu_assign_list = list(reader)
+        # Convert the list to a dictionary
+        for row in gpu_assign_list:
+            gpu_assign_dict[row['Host'].lower() + '-' + row['GPU_id']] = row
     with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as output:
         csv_writer = csv.DictWriter(output, fieldnames=column_names)
         csv_writer.writeheader()
@@ -63,6 +78,15 @@ def write_to_file(data):
                 model_name = a['metric']['modelName']
                 gpu_id = a['metric']['gpu']
                 values = a['values']
+                team = ""
+                part = ""
+                person = ""
+                if args.gpu_assigned_table:
+                    if hostname.lower() + '-' + gpu_id in gpu_assign_dict:
+                        team = gpu_assign_dict[hostname.lower() + '-' + gpu_id]['Team']
+                        part = gpu_assign_dict[hostname.lower() + '-' + gpu_id]['Part']
+                        person = gpu_assign_dict[hostname.lower() + '-' + gpu_id]['Person']
+
                 for i in values:
                     check_time = datetime.fromtimestamp(i[0])
                     metric_value = int(i[1])
@@ -71,7 +95,8 @@ def write_to_file(data):
                         'hostname': hostname, 'gpu model': model_name, 'gpu id': gpu_id, 'check time': check_time,
                         'year': check_time.year, 'month': check_time.month, 'day': check_time.day,
                         'week': check_time.strftime("%V"),
-                        'utilization': metric_value, 'is_used': is_used
+                        'utilization': metric_value, 'is_used': is_used,
+                        'team': team, 'part': part, 'person': person
                     })
             except KeyError as e:
                 logging.error(e)
@@ -93,6 +118,19 @@ if __name__ == "__main__":
 
     with zipfile.ZipFile(file_name_zip, 'w', zipfile.ZIP_DEFLATED) as zip_writer:
         zip_writer.write(file_name, arcname=os.path.basename(args.end_time) + ".csv")
+
+    # Convert csv file to pandas dataframe
+    df = pd.read_csv(file_name)
+    # Create pivot table
+    pivot = df.pivot_table(index=args.pivot_index.split(","), columns=args.pivot_columns.split(","), values=args.pivot_values.split(","), aggfunc=args.pivot_aggfunc)
+    logging.info(pivot)
+    # Write pivot table to excel file
+    temp_dir = tempfile.TemporaryDirectory()
+    os.system("mkdir -p " + temp_dir.name)
+    temp_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-table.xlsx")
+    logging.info("Write a pivot table to " + temp_file_path)
+    pivot.to_excel(temp_file_path)
+
     CHARSET = "UTF-8"
     msg = MIMEMultipart()
     msg["Subject"] = "GPU Usage"
@@ -108,7 +146,14 @@ if __name__ == "__main__":
         part.add_header("Content-Disposition",
                         "attachment",
                         filename=args.end_time + ".zip")
-    msg.attach(part)
+        msg.attach(part)
+
+    with open(temp_file_path, "rb") as attachment2:
+        part2 = MIMEApplication(attachment2.read())
+        part2.add_header("Content-Disposition",
+                        "attachment",
+                        filename=args.end_time + "-pivot-table.xlsx")
+        msg.attach(part2)
 
     # Send email to sender by smtplib
     try:
