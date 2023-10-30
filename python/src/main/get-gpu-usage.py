@@ -12,6 +12,7 @@ import boto3
 import zipfile
 import tempfile
 import smtplib
+import pandas as pd
 
 datetime_format = "%Y-%m-%d %H:%M:%S %Z"
 log_level: str = os.getenv("LOG_LEVEL", default="INFO")
@@ -36,6 +37,12 @@ arg_parser.add_argument("--delete_temp_file", action="store_true", default=True,
 arg_parser.add_argument("--smtp_host", default="email-smtp.ap-northeast-2.amazonaws.com", help="SMTP host")
 arg_parser.add_argument("--smtp_port", default=587, type=int, help="SMTP port")
 arg_parser.add_argument("--gpu-assigned-table", help="GPU assigned table")
+arg_parser.add_argument("--pivot-index", default="week,team,part,person")
+arg_parser.add_argument("--pivot-columns", default="hostname")
+arg_parser.add_argument("--pivot-values", default="is_used")
+arg_parser.add_argument("--pivot-aggfunc", default="sum")
+
+
 args = arg_parser.parse_args()
 server_url = args.prometheus_url
 metric_name = args.metric
@@ -111,6 +118,19 @@ if __name__ == "__main__":
 
     with zipfile.ZipFile(file_name_zip, 'w', zipfile.ZIP_DEFLATED) as zip_writer:
         zip_writer.write(file_name, arcname=os.path.basename(args.end_time) + ".csv")
+
+    # Convert csv file to pandas dataframe
+    df = pd.read_csv(file_name)
+    # Create pivot table
+    pivot = df.pivot_table(index=args.pivot_index.split(","), columns=args.pivot_columns.split(","), values=args.pivot_values.split(","), aggfunc=args.pivot_aggfunc)
+    logging.info(pivot)
+    # Write pivot table to excel file
+    temp_dir = tempfile.TemporaryDirectory()
+    os.system("mkdir -p " + temp_dir.name)
+    temp_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-table.xlsx")
+    logging.info("Write a pivot table to " + temp_file_path)
+    pivot.to_excel(temp_file_path)
+
     CHARSET = "UTF-8"
     msg = MIMEMultipart()
     msg["Subject"] = "GPU Usage"
@@ -126,7 +146,14 @@ if __name__ == "__main__":
         part.add_header("Content-Disposition",
                         "attachment",
                         filename=args.end_time + ".zip")
-    msg.attach(part)
+        msg.attach(part)
+
+    with open(temp_file_path, "rb") as attachment2:
+        part2 = MIMEApplication(attachment2.read())
+        part2.add_header("Content-Disposition",
+                        "attachment",
+                        filename=args.end_time + "-pivot-table.xlsx")
+        msg.attach(part2)
 
     # Send email to sender by smtplib
     try:
