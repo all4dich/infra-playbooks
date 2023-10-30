@@ -13,6 +13,7 @@ import zipfile
 import tempfile
 import smtplib
 import pandas as pd
+import numpy as np
 
 datetime_format = "%Y-%m-%d %H:%M:%S %Z"
 log_level: str = os.getenv("LOG_LEVEL", default="INFO")
@@ -146,11 +147,28 @@ if __name__ == "__main__":
     # Write pivot table to excel file
     temp_dir = tempfile.TemporaryDirectory()
     os.system("mkdir -p " + temp_dir.name)
-    temp_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-table.xlsx")
-    temp_pivot_count_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-count.xlsx")
-    logging.info("Write a pivot table to " + temp_file_path)
-    pivot.to_excel(temp_file_path)
-    pivot_index_count.to_excel(temp_pivot_count_file_path)
+    pivot_usage_data_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-table.xlsx")
+    pivot_usage_percent_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-table-percent.xlsx")
+    pivot_gpu_assigned_info_file_path = os.path.join(temp_dir.name, args.end_time + "-pivot-count.xlsx")
+    logging.info("Write a pivot table to " + pivot_usage_data_file_path)
+    pivot.to_excel(pivot_usage_data_file_path)
+
+    logging.info("Convert number of slots used to percent")
+    for index_a in pivot.index:
+        value = pivot.loc[index_a]
+        index_b = index_a[1:]
+        slot_data = pivot_index_count.loc[index_b]
+        for is_used, hostname, in value.index:
+            # print(is_used, hostname, value[is_used, hostname], slot_data[hostname.lower()])
+            used_value = value[is_used, hostname]
+            slot_value = slot_data[hostname.lower()]
+            if str(used_value) != str(np.nan):
+                print(used_value, slot_value, 100 * (used_value / slot_value))
+                pivot.loc[index_a].loc[is_used, hostname] = 100 * ( used_value / slot_value)
+
+    logging.info("Write a pivot table to " + pivot_usage_percent_file_path)
+    pivot.to_excel(pivot_usage_percent_file_path)
+    pivot_index_count.to_excel(pivot_gpu_assigned_info_file_path)
 
     CHARSET = "UTF-8"
     msg = MIMEMultipart()
@@ -169,14 +187,21 @@ if __name__ == "__main__":
                         filename=args.end_time + ".zip")
         msg.attach(part)
 
-    with open(temp_file_path, "rb") as attachment2:
+    with open(pivot_usage_data_file_path, "rb") as attachment2:
         part2 = MIMEApplication(attachment2.read())
         part2.add_header("Content-Disposition",
                         "attachment",
                         filename=args.end_time + "-pivot-table.xlsx")
         msg.attach(part2)
 
-    with open(temp_pivot_count_file_path, "rb") as attachment3:
+    with open(pivot_usage_percent_file_path, "rb") as attachment2:
+        part2 = MIMEApplication(attachment2.read())
+        part2.add_header("Content-Disposition",
+                        "attachment",
+                        filename=args.end_time + "-pivot-table-percent.xlsx")
+        msg.attach(part2)
+
+    with open(pivot_gpu_assigned_info_file_path, "rb") as attachment3:
         part3 = MIMEApplication(attachment3.read())
         part3.add_header("Content-Disposition",
                         "attachment",
