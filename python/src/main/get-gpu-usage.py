@@ -209,6 +209,7 @@ if __name__ == "__main__":
         msg.attach(part3)
 
     # Send email to sender by smtplib
+    fail_to_send_mail= False
     try:
         logging.info("Send email to " + args.receiver + " by smtplib")
         smtp_client = smtplib.SMTP(args.smtp_host, args.smtp_port)
@@ -219,11 +220,11 @@ if __name__ == "__main__":
     except Exception as e:
         logging.error("Can't send email to " + args.receiver + " by smtplib")
         logging.error(e)
-    # delete temp file
-    if args.delete_temp_file:
-        logging.info("Delete temporary files")
-        os.remove(file_name)
-        os.remove(file_name_zip)
-    logging.info("Assigned Datal")
-    logging.info(pivot_index_count)
+        fail_to_send_mail= True
+        exit(1)
+    finally:
+        if args.delete_temp_file:
+            logging.info("Delete temporary files")
+            os.remove(file_name)
+            os.remove(file_name_zip)
     logging.info("Done")
