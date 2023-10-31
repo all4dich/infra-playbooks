@@ -40,20 +40,37 @@ all:
           ansible_host: 10.169.20.118
         3090m:
           ansible_host: 10.169.20.120
+        3090i:
+          ansible_host: 10.169.20.121
+        3090j:
+          ansible_host: 10.169.20.122
+        3090k:
+          ansible_host: 10.169.20.123
+        3090l:
+          ansible_host: 10.169.20.124
+        nota-server-01:
+          ansible_host: 10.169.20.125
+        nota-server-02:
+          ansible_host: 10.169.20.126
+        nota-server-03:
+          ansible_host: 10.169.20.127
+        nota-server-04:
+          ansible_host: 10.169.20.128
+        nota-server-05:
+          ansible_host: 10.169.20.129
     seoul:
       children:
         seoul_gpu:
           hosts:
-            3090i:
-              ansible_host: 10.169.10.17
-            3090j:
-              ansible_host: 10.169.10.18
-            3090k:
-              ansible_host: 10.169.10.19
-            3090l:
-              ansible_host: 10.169.10.20
             argus:
               ansible_host: 10.169.10.12
+            A30A:
+              ansible_host: 10.169.10.28
+            gpu_307090:
+              ansible_host: 10.169.10.29
+            nota-its:
+              ansible_host: 10.169.10.34
+          vars:
           vars:
             ansible_port: 2222
             ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
