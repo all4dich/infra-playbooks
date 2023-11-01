@@ -1,0 +1,23 @@
+name: Get GPU Usage Data
+run-name: Get GPU Usage Data
+on:
+  schedule:
+    - cron: '0 4 * * *'
+jobs:
+  Get-GPU-Usage-Data:
+    runs-on: nota-infra-manager
+    environment: get_gpu_usage
+    container:
+      image: notadockerhub/infra-python:3.9.16
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "🖥️ Run program"
+      - run: pwd
+      #- run: pip3 install -r requirements.txt --no-input
+      - run: echo "END_DATE=$(date --rfc-3339=seconds|awk -F+ '{print $1}')" >> ${GITHUB_ENV}
+      - run: python3 python/src/main/get-gpu-usage.py --aws_access_key=${{ secrets.INFRA_AWS_ACCESS_KEY_ID }} --aws_secret_access_key=${{ secrets.INFRA_AWS_SECRET_ACCESS_KEY }} --receiver="${{ vars.RECEIVER }} " --start_time="${{ vars.START_TIME }}" --end_time="${END_DATE} UTC" --gpu-assigned-table data/nota-gpu-assign-table.csv
+#      - name: List files in the repository
+#        run: |
+#          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
