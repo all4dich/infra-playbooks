@@ -1,0 +1,36 @@
+name: Backup Netspresso RDB
+run-name: Backup Netspresso RDB
+on:
+  schedule:
+    - cron: '0 6 * * *'
+    - cron: '0 14 * * *'
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.INFRA_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.INFRA_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: 'ap-northeast-2'
+  DB_ADMIN_USERNAME_12: ${{ secrets.DB_ADMIN_USERNAME_12 }}
+  DB_ADMIN_PASSWORD_12: ${{ secrets.DB_ADMIN_PASSWORD_12 }}
+  DB_ADMIN_USERNAME_12_43306: ${{ secrets.DB_ADMIN_USERNAME_12_43306 }}
+  DB_ADMIN_PASSWORD_12_43306: ${{ secrets.DB_ADMIN_PASSWORD_12_43306 }}
+  DB_ADMIN_USERNAME_14: ${{ secrets.DB_ADMIN_USERNAME_14 }}
+  DB_ADMIN_PASSWORD_14: ${{ secrets.DB_ADMIN_PASSWORD_14 }}
+  DB_ADMIN_USERNAME_15: ${{ secrets.DB_ADMIN_USERNAME_15 }}
+  DB_ADMIN_PASSWORD_15: ${{ secrets.DB_ADMIN_PASSWORD_15 }}
+  DB_ADMIN_USERNAME_NP_PROD: ${{ secrets.DB_ADMIN_USERNAME_NP_PROD }}
+  DB_ADMIN_PASSWORD_NP_PROD: ${{ secrets.DB_ADMIN_PASSWORD_NP_PROD }}
+  DB_ADMIN_USERNAME_NP_STAGING: ${{ secrets.DB_ADMIN_USERNAME_NP_STAGING }}
+  DB_ADMIN_PASSWORD_NP_STAGING: ${{ secrets.DB_ADMIN_PASSWORD_NP_STAGING }}
+
+jobs:
+  Backup-Netspresso-RDB:
+    runs-on: nota-infra-manager
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          path: backup-db
+      - run: echo "🖥️ Run program"
+      - run: env
+      - run: sh ./database/scripts/db-backup-with-variable.sh
+        working-directory: backup-db
+      - run: echo "🍏 This job's status is ${{ job.status }}."
