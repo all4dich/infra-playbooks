@@ -2,10 +2,8 @@ name: Backup Netspresso RDB
 run-name: Backup Netspresso RDB
 on:
   schedule:
-    - cron: '0 23 * * *'
-  push:
-    branches:
-      - feature/db-backup
+    - cron: '0 6 * * *'
+    - cron: '0 14 * * *'
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.INFRA_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.INFRA_AWS_SECRET_ACCESS_KEY }}
