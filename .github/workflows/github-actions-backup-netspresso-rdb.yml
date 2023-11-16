@@ -3,7 +3,6 @@ run-name: Backup Netspresso RDB
 on:
   schedule:
     - cron: '0 6 * * *'
-    - cron: '0 14 * * *'
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.INFRA_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.INFRA_AWS_SECRET_ACCESS_KEY }}
@@ -20,7 +19,8 @@ env:
   DB_ADMIN_PASSWORD_NP_PROD: ${{ secrets.DB_ADMIN_PASSWORD_NP_PROD }}
   DB_ADMIN_USERNAME_NP_STAGING: ${{ secrets.DB_ADMIN_USERNAME_NP_STAGING }}
   DB_ADMIN_PASSWORD_NP_STAGING: ${{ secrets.DB_ADMIN_PASSWORD_NP_STAGING }}
-
+  DB_ADMIN_NP_LOGIN_PROD_USERNAME: ${{ secrets.DB_ADMIN_NP_LOGIN_PROD_USERNAME }}
+  DB_ADMIN_NP_LOGIN_PROD_PASSWORD: ${{ secrets.DB_ADMIN_NP_LOGIN_PROD_PASSWORD }}
 jobs:
   Backup-Netspresso-RDB:
     runs-on: nota-infra-manager
