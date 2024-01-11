@@ -1,0 +1,60 @@
+- name: Get User
+  vars_prompt:
+    - name: target_user
+      prompt: "Set username"
+      private: no
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    email_sender: "administrator@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
+  hosts: "{{ target_host }}"
+  tasks:
+    # check if BIND_DN and BIND_PW are set
+    - name: Check if BIND_DN and BIND_PW are set
+      assert:
+        that:
+          - lookup('ansible.builtin.env', 'BIND_DN') is defined
+          - lookup('ansible.builtin.env', 'BIND_PW') is defined
+        msg: "BIND_DN and BIND_PW are not set"
+    - name: Check if home directory exists
+      stat:
+        path: "/home/{{ target_user }}"
+      register: home_dir
+      failed_when: home_dir.stat.exists == False
+    - name: Get User UID
+      run_once: true
+      local_action:
+        module: community.general.ldap_search
+        server_uri: "ldap://nas-admin.nota.ai"
+        dn: "uid={{ target_user }},{{ lookup('ansible.builtin.env', 'BASE_DN')|default('cn=users,dc=nas-admin,dc=nota,dc=ai') }}"
+        scope: "base"
+        attrs:
+            - uidNumber
+        bind_dn: "{{ lookup('ansible.builtin.env', 'BIND_DN') }}"
+        bind_pw: "{{ lookup('ansible.builtin.env', 'BIND_PW') }}"
+      register: uid_outputs
+    - debug:
+        msg: "{{ uid_outputs['results'][0]['uidNumber']}}"
+    - name: Change home directory owner
+      become: true
+      file:
+          path: "/home/{{ target_user }}/"
+          owner: "{{ uid_outputs['results'][0]['uidNumber']}}"
+          group: users
+          recurse: yes
+    - name: Change home directory permission
+      become: true
+      file:
+          path: "/home/{{ target_user }}/"
+          mode: 0700
+          recurse: no
+    - name: Change .ssh directory permission
+      become: true
+      file:
+        path: "/home/{{ target_user }}/.ssh"
+        mode: 0700
+        recurse: yes

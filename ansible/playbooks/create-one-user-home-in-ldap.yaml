@@ -1,0 +1,134 @@
+---
+- name: Create User Account
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+    - name: target_user
+      prompt: "Set username"
+      private: no
+    - name: user_email
+      prompt: "Set user email address"
+      private: no
+    - name: user_home
+      prompt: "Set user home"
+      private: no
+  vars:
+    user_shell: "/bin/bash"
+    email_sender: "administrator@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
+  hosts: "{{ target_host }}"
+  tasks:
+    - name: Get Hostname and IP Address
+      shell: "echo {{ ansible_hostname }} : {{ ansible_default_ipv4.address }}"
+      register: ip_outputs
+    - set_fact:
+        all_hosts: "{{ ansible_play_hosts | map('extract', hostvars, 'ip_outputs') | map(attribute='stdout') | list }}"
+      delegate_to: localhost
+      run_once: true
+    - name: Create user real home directory
+      become: yes
+      ansible.builtin.file:
+        path: "{{ user_home }}"
+        state: directory
+        owner: "{{ target_user }}"
+        group: users
+        mode: 0700
+    - name: Create user directory on NAS
+      become: yes
+      ansible.builtin.file:
+          path: "/mnt/nas/people/{{ target_user }}"
+          state: directory
+          owner: "{{ target_user }}"
+          group: users
+          mode: 0750
+      ignore_errors: yes
+    - name: Create a symlibic link /home/{{ target_user }} -> {{ user_home }}
+      become: true
+      file:
+        src: "{{ user_home }}"
+        dest: "/home/{{ target_user }}"
+        state: link
+    - name: Create user .ssh directory
+      become: yes
+      ansible.builtin.file:
+        path: "{{ user_home }}/.ssh"
+        state: directory
+        owner: "{{ target_user }}"
+        group: users
+        mode: 0700
+    - name: Create user key 
+      local_action:
+        module: community.crypto.openssh_keypair
+        path: "id_rsa"
+        mode: 0700
+      run_once: true
+    - name: Upload public key 
+      become: true
+      ansible.builtin.copy:
+        src: "id_rsa.pub"      
+        dest: "{{ user_home }}/.ssh/id_rsa.pub"
+        owner: "{{ target_user }}"
+        #group: nobody
+        mode: 0700
+    - name: Upload private key 
+      become: true
+      ansible.builtin.copy:
+        src: "id_rsa"      
+        dest: "{{ user_home }}/.ssh/id_rsa"
+        owner: "{{ target_user }}"
+        #group: nobody
+        mode: 0700
+    - name: Set authorized key
+      become: true
+      shell: su - {{ target_user }} bash -c 'cat {{ user_home }}/.ssh/id_rsa.pub > {{ user_home }}/.ssh/authorized_keys'
+    - name: Send a key file to a user
+      run_once: true
+      local_action:
+        module: community.general.mail
+        host: "{{ smtp_host }}"
+        port: "{{ lookup('ansible.builtin.env', 'SMTP_PORT')|default('587')|int }}"
+        username: "{{ smtp_username }}"
+        password: "{{ smtp_password }}"
+        to: "{{ user_email }}"
+        sender: "{{ email_sender }}"
+        subject: Your account '{{ target_user }} on {{ ansible_play_hosts | join(', ') }}' is  created
+        body: |
+            An account  "{{ target_user }}"  is created.
+            
+            Hosts:
+            {% for item in all_hosts %}
+              * {{ item }}
+            {% endfor %}
+
+            You can log onto them with an attached private key file.
+            Copy a file to $HOME/.ssh and change its permission as 0600
+
+              $> chmod 0600 ~/.ssh/id_rsa
+              $> ssh -p 2222 -i ~/.ssh/id_rsa {{ target_user }}@HOST_ADDRESS
+            
+        attach:
+          - "id_rsa"
+#    - name: Remove user key file
+#      run_once: true
+#      local_action:
+#        module: ansible.builtin.file
+#        path: "{{ item }}"
+#        state: absent
+#      with_items:
+#        - id_rsa
+#        - id_rsa.pub
+#    - name: Download a key file
+#      fetch:
+#        src: "{{ user_home }}/.ssh/id_rsa"
+#        dest: ./id_rsa_{{ target_user }}
+#        flat: yes
+#    - name: Remove a key file on the server
+#      file:
+#        path: "{{ item }}"
+#        state: absent
+#      with_items:
+#        - ~{{ target_user }}/.ssh/id_rsa
+#        - ~{{ target_user }}/.ssh/id_rsa.pub

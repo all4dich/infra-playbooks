@@ -11,7 +11,8 @@
       prompt: "Set user email"
       private: no
   vars:
-    key_file_name: "new_ssh_key_file"
+    key_file_path: "/tmp/ssh_key_{{ target_user }}"
+    key_file_name: "ssh_key_{{ target_user }}"
     email_sender: "administrator@nota.ai"
   hosts: "{{ target_host }}"
   tasks:
@@ -28,25 +29,25 @@
         path: "~{{ target_user }}/.ssh"
         state: directory
         owner: "{{ target_user }}"
-        group: "{{ target_user }}"
+        group: users
         mode: 0700
     - name: Create new ssh key for a user
       delegate_to: localhost
       run_once: true
       community.crypto.openssh_keypair:
-        path: "{{ key_file_name }}"
+        path: "{{ key_file_path }}"
         mode: 0600
     - name: Create a public key from private key file
       delegate_to: localhost
       run_once: true
-      shell: ssh-keygen -y -f {{ key_file_name }} -C {{ target_user }}@nota > {{ key_file_name }}.pub
+      shell: ssh-keygen -y -f {{ key_file_path }} -C {{ target_user }} > {{ key_file_path }}.pub
     - name: Upload public key
       become: true
       ansible.builtin.copy:
-        src: "{{ key_file_name }}.pub"
+        src: "{{ key_file_path }}.pub"
         dest: "~{{ target_user }}/.ssh/{{ key_file_name }}.pub"
         owner: "{{ target_user }}"
-        group: "{{ target_user }}"
+        group: users
         mode: 0700
     - name: Set authorized key
       become: true
@@ -76,13 +77,13 @@
               $> chmod 0600 ~/.ssh/{{ key_file_name | basename }}
               $> ssh -p 2222 -i ~/.ssh/{{ key_file_name | basename }} {{ target_user}}@HOST_ADDRESS
         attach:
-          - "{{ key_file_name }}"
-    - name: Remove a key file
-      delegate_to: localhost
-      run_once: true
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - "{{ key_file_name }}"
-        - "{{ key_file_name }}.pub"
+          - "{{ key_file_path }}"
+#    - name: Remove a key file
+#      delegate_to: localhost
+#      run_once: true
+#      file:
+#        path: "{{ item }}"
+#        state: absent
+#      with_items:
+#        - "{{ key_file_name }}"
+#        - "{{ key_file_name }}.pub"

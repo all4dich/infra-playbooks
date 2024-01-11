@@ -1,0 +1,32 @@
+---
+- name: Reset User Password
+  vars_prompt:
+    - name: target_user
+      prompt: "Set Username"
+      private: no
+  vars:
+    target_shell: "/bin/bash"
+  hosts: localhost
+  tasks:
+    - name: Remove user shell
+      run_once: true
+      local_action:
+        module: community.general.ldap_attrs
+        server_uri: "ldap://nas-admin.nota.ai"
+        dn: "uid={{ target_user }},{{ lookup('ansible.builtin.env', 'BASE_DN')|default('cn=users,dc=nas-admin,dc=nota,dc=ai') }}"
+        bind_dn: "{{ lookup('ansible.builtin.env', 'BIND_DN') }}"
+        bind_pw: "{{ lookup('ansible.builtin.env', 'BIND_PW') }}"
+        attributes:
+          loginShell: []
+        state: exact
+    - name: Set user shell
+      run_once: true
+      local_action:
+        module: community.general.ldap_attrs
+        server_uri: "ldap://nas-admin.nota.ai"
+        dn: "uid={{ target_user }},{{ lookup('ansible.builtin.env', 'BASE_DN')|default('cn=users,dc=nas-admin,dc=nota,dc=ai') }}"
+        bind_dn: "{{ lookup('ansible.builtin.env', 'BIND_DN') }}"
+        bind_pw: "{{ lookup('ansible.builtin.env', 'BIND_PW') }}"
+        attributes:
+          loginShell: "{{ target_shell }}"
+        state: present

@@ -1,0 +1,27 @@
+- name: Check user home directory size
+  vars_prompt:
+    - name: target_user
+      prompt: "Set username"
+      private: no
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    email_sender: "administrator@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
+  hosts: "{{ target_host|lower }}"
+  tasks:
+    # check if BIND_DN and BIND_PW are set
+    - name: Check if BIND_DN and BIND_PW are set
+      assert:
+        that:
+          - lookup('ansible.builtin.env', 'BIND_DN') is defined
+          - lookup('ansible.builtin.env', 'BIND_PW') is defined
+        msg: "BIND_DN and BIND_PW are not set"
+    - name: Get User Home Directory Size
+      shell: "du -sh ~{{ target_user }} | cut -f1"
+      register: user_home_size
+    - debug:
+        msg: "{{ target_host }}, {{ target_user }}, {{ user_home_size.stdout }}"

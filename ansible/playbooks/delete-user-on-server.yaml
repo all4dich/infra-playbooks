@@ -1,0 +1,22 @@
+- name: Check user home directory size
+  vars_prompt:
+    - name: target_user
+      prompt: "Set username"
+      private: no
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    email_sender: "administrator@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
+    do_remove: "no"
+  hosts: "{{ target_host }}"
+  become: true
+  tasks:
+    - name: Remove user account
+      ansible.builtin.user:
+        name: "{{ target_user }}"
+        state: absent
+        remove: "{{ do_remove }}"

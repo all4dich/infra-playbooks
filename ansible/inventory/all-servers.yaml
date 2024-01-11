@@ -71,7 +71,6 @@ all:
             nota-its:
               ansible_host: 10.169.10.34
           vars:
-          vars:
             ansible_port: 2222
             ansible_user: '{{ lookup("env", "ANSIBLE_USERNAME") }}'
             ansible_password: '{{ lookup("env", "ANSIBLE_PASSWORD") }}'

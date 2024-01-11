@@ -1,0 +1,99 @@
+- name: Get User
+  vars_prompt:
+    - name: target_user
+      prompt: "Set username"
+      private: no
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    email_sender: "administrator@nota.ai"
+    smtp_host: '{{ lookup("env", "SMTP_HOST") }}'
+    smtp_username: '{{ lookup("env", "SMTP_USERNAME") }}'
+    smtp_password: '{{ lookup("env", "SMTP_PASSWORD") }}'
+    new_username: "{{ target_user }}"
+  hosts: "{{ target_host }}"
+  tasks:
+    # check if BIND_DN and BIND_PW are set
+    - name: Check if BIND_DN and BIND_PW are set
+      assert:
+        that:
+          - lookup('ansible.builtin.env', 'BIND_DN') is defined
+          - lookup('ansible.builtin.env', 'BIND_PW') is defined
+        msg: "BIND_DN and BIND_PW are not set"
+    - name: Check if a user exist on local system
+      shell: "grep -c {{ target_user }} /etc/passwd"
+      register: user_exist
+      failed_when: user_exist.rc == 1
+    - name: Get User Home Directory
+      shell: "grep {{ target_user }} /etc/passwd | cut -d ':' -f 6"
+      register: user_home_dir
+#    - name: Check if home directory is link
+#      stat:
+#        path: "/home/{{ target_user }}"
+#      register: home_directory_is_link
+    - name: Delete Local user
+      become: true
+      user:
+        name: "{{ target_user }}"
+        state: absent
+        remove: no
+    - name: Create a symlibic link /home/{{ new_username }} -> {{ user_home_dir.stdout }}
+      become: true
+      file:
+        src: "{{ user_home_dir.stdout }}"
+        dest: "/home/{{ new_username }}"
+        state: link
+      when: user_home_dir.stdout is not regex('^/home/{{ new_username }}')
+#    - name: Get User UID
+#      run_once: true
+#      local_action:
+#        module: community.general.ldap_search
+#        server_uri: "ldap://nas-admin.nota.ai"
+#        dn: "uid={{ new_username }},{{ lookup('ansible.builtin.env', 'BASE_DN')|default('cn=users,dc=nas-admin,dc=nota,dc=ai') }}"
+#        scope: "base"
+#        attrs:
+#            - uidNumber
+#        bind_dn: "{{ lookup('ansible.builtin.env', 'BIND_DN') }}"
+#        bind_pw: "{{ lookup('ansible.builtin.env', 'BIND_PW') }}"
+#      register: uid_outputs
+#    - debug:
+#        msg: "{{ uid_outputs['results'][0]['uidNumber']}}"
+    - name: Change ssh directory owner
+      become: true
+      file:
+          path: "/home/{{ new_username }}/.ssh"
+#          owner: "{{ uid_outputs['results'][0]['uidNumber']}}"
+          owner: "{{ new_username }}"
+          group: users
+          recurse: yes
+    - name: Change home directory permission
+      become: true
+      file:
+          path: "/home/{{ new_username }}/"
+          mode: 0700
+          recurse: no
+    - name: Change .ssh directory permission
+      become: true
+      file:
+        path: "/home/{{ new_username }}/.ssh"
+        mode: 0700
+        recurse: yes
+    - name: Change home directory permission - real path
+      become: true
+      file:
+          path: "{{ user_home_dir.stdout }}"
+          mode: 0700
+          recurse: no
+    - name: Change home directory owner
+      become: true
+      #shell: nohup chown -R {{ new_username }}:users /home/{{ new_username }} </dev/null >/dev/null 2>&1 &
+      shell: nohup chown -R {{ new_username }}:users /home/{{ new_username }}/ &
+#    - name: Change home directory owner
+#      become: true
+#      file:
+#          path: "/home/{{ new_username }}/"
+##          owner: "{{ uid_outputs['results'][0]['uidNumber']}}"
+#          owner: "{{ new_username }}"
+#          group: users
+#          recurse: no
