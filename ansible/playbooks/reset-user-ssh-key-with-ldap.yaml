@@ -7,15 +7,28 @@
     - name: target_user
       prompt: "Set Username"
       private: no
-    - name: user_email
-      prompt: "Set user email"
-      private: no
+#    - name: user_email
+#      prompt: "Set user email"
+#      private: no
   vars:
     key_file_path: "/tmp/ssh_key_{{ target_user }}"
     key_file_name: "ssh_key_{{ target_user }}"
     email_sender: "administrator@nota.ai"
   hosts: "{{ target_host }}"
   tasks:
+    - name: Get User email from LDAP Server with   community.general.ldap_search
+      local_action:
+        module: community.general.ldap_search
+        server_uri: "ldap://nas-admin.nota.ai"
+        bind_dn: "{{ lookup('ansible.builtin.env', 'BIND_DN') }}"
+        bind_pw: "{{ lookup('ansible.builtin.env', 'BIND_PW') }}"
+        dn: "{{ lookup('ansible.builtin.env', 'BASE_DN')|default('cn=users,dc=nas-admin,dc=nota,dc=ai') }}"
+        scope: onelevel
+        filter: "(uid={{ target_user }})"
+        attrs:
+          - mail
+      register: user_email
+      run_once: true
     - name: Get Hostname and IP Address
       shell: "echo {{ ansible_hostname }} : {{ ansible_default_ipv4.address }}"
       register: ip_outputs
@@ -60,7 +73,7 @@
         username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
         password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
         port: "{{ lookup('ansible.builtin.env', 'SMTP_PORT')|default('587')|int }}"
-        to: "{{ user_email }}" 
+        to: "{{ user_email.results[0].mail }}"
         sender: "{{ email_sender }}"
         subject: Your account '{{ target_user }} on {{ ansible_play_hosts | join(', ') }}' get a new ssh key
         body: |
