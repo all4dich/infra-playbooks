@@ -64,9 +64,9 @@ all:
           hosts:
             argus:
               ansible_host: 10.169.10.12
-            A30A:
+            a30a:
               ansible_host: 10.169.10.28
-            gpu_307090:
+            gpu307090:
               ansible_host: 10.169.10.29
             nota-its:
               ansible_host: 10.169.10.34
