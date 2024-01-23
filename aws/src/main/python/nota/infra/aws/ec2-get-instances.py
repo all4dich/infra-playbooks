@@ -84,7 +84,7 @@ def get_events(instance_data):
     for each_event in events:
         if each_event['EventName'] == 'StartInstances':
             if end_date < each_event['EventTime']:
-                end_date = target_time.replace(month=current_time, day=1, hour=0, minute=0, second=0, microsecond=0)
+                end_date = target_time.replace(month=current_time.month, day=1, hour=0, minute=0, second=0, microsecond=0)
             total_duration = total_duration + (end_date - each_event['EventTime'])
             end_date = target_time.replace(month=target_month, day=1, hour=0, minute=0, second=0, microsecond=0)
         elif each_event['EventName'] == 'StopInstances':
