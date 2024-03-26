@@ -2,26 +2,6 @@ all:
   children:
     daejeon:
       hosts:
-        honest: # A100
-          ansible_host: 10.169.20.100
-        truth:
-          ansible_host: 10.169.20.102
-        love:
-          ansible_host: 10.169.20.101
-        wish:
-          ansible_host: 10.169.20.105
-        beauty:
-          ansible_host: 10.169.20.103
-        wisdom:
-          ansible_host: 10.169.20.104
-        sejong:
-          ansible_host: 10.169.20.106
-        galilei:
-          ansible_host: 10.169.20.107
-        hope:
-          ansible_host: 10.169.20.108
-        dasom:
-          ansible_host: 10.169.20.109
         3090a:
           ansible_host: 10.169.20.110
         3090b:
@@ -38,8 +18,6 @@ all:
           ansible_host: 10.169.20.117
         3090h:
           ansible_host: 10.169.20.118
-        3090m:
-          ansible_host: 10.169.20.120
         3090i:
           ansible_host: 10.169.20.121
         3090j:
@@ -48,6 +26,22 @@ all:
           ansible_host: 10.169.20.123
         3090l:
           ansible_host: 10.169.20.124
+        3090m:
+          ansible_host: 10.169.20.120
+        beauty:
+          ansible_host: 10.169.20.103
+        dasom:
+          ansible_host: 10.169.20.109
+        dgx-a100:
+          ansible_host: 10.169.20.130
+        galilei:
+          ansible_host: 10.169.20.107
+        honest: # A100
+          ansible_host: 10.169.20.100
+        hope:
+          ansible_host: 10.169.20.108
+        love:
+          ansible_host: 10.169.20.101
         nota-server-01:
           ansible_host: 10.169.20.125
         nota-server-02:
@@ -58,12 +52,18 @@ all:
           ansible_host: 10.169.20.128
         nota-server-05:
           ansible_host: 10.169.20.129
+        sejong:
+          ansible_host: 10.169.20.106
+        truth:
+          ansible_host: 10.169.20.102
+        wisdom:
+          ansible_host: 10.169.20.104
+        wish:
+          ansible_host: 10.169.20.105
     seoul:
       children:
         seoul_gpu:
           hosts:
-            argus:
-              ansible_host: 10.169.10.12
             a30a:
               ansible_host: 10.169.10.28
             gpu307090:
@@ -80,6 +80,8 @@ all:
           hosts:
             adam:
               ansible_host: 10.169.10.15
+            argus:
+              ansible_host: 10.169.10.12
             eve:
               ansible_host: 10.169.10.14
   vars:
