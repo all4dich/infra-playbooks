@@ -13,6 +13,12 @@ export SMTP_HOST=email-smtp.ap-northeast-2.amazonaws.com
 ```
 Some scripts send a mail to a user for let a user know the result. Emails will be delivered to a user via Amazon SES.
 ## Server Management
+### General
+#### Upload local artifacts to remote servers
+Run copy_artifacts.yaml like this 
+```shell
+ansible-playbook -i inventory/all-servers.yaml playbooks/copy_artifacts.yaml -e hosts=eve -e owner=dev -e group=root -e source=/Users/sunjoo/test.yaml -
+```
 ### User Management
 #### Create User Account
 * Create a one user. A user will be received a mail that have user password and new ssh private key.
