@@ -1,0 +1,23 @@
+---
+- name: Copy artifacts to target hosts
+  vars_prompt:
+    - name: source
+      prompt: "Set source directory or file(source_dir)"
+      private: no
+    - name: target
+      prompt: "Set target directory or file on the remote(target_dir)"
+      private: no
+  vars:
+    hosts: all
+    owner: root
+    group: root 
+  hosts: "{{ hosts }}"
+  order: sorted
+  become: yes
+  tasks:
+    - name: Copy Artifacts
+      ansible.builtin.copy:
+        src: "{{ source }}"
+        dest: "{{ target }}"
+        owner: "{{ owner }}"
+        group: "{{ group }}"
