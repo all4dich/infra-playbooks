@@ -51,6 +51,26 @@
         src: "{{ user_home }}"
         dest: "/home/{{ target_user }}"
         state: link
+    - name: Copy .bashrc from /etc/skel
+      become: yes
+      ansible.builtin.copy:
+        remote_src: true
+        src: "/etc/skel/.bashrc"
+        dest: "{{ user_home }}/.bashrc"
+        owner: "{{ target_user }}"
+        group: users
+        mode: 0644
+    - name: Create .profile file
+      become: yes
+      ansible.builtin.copy:
+        dest: "{{ user_home }}/.profile"
+        content: |
+          if [ -f ~/.bashrc ]; then
+              . ~/.bashrc
+          fi
+        owner: "{{ target_user }}"
+        group: users
+        mode: 0644
     - name: Create user .ssh directory
       become: yes
       ansible.builtin.file:
