@@ -1,0 +1,42 @@
+---
+- name: Install node-exporter service
+  become: yes
+  vars_prompt:
+    - name: node_exporter_path
+      prompt: "node exporter path on the local machine"
+      private: no
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    target_path: /usr/local/node-exporter
+  hosts: "{{ target_host }}"
+  tasks:
+    - name: Stop node-exporter service if it is running by pkill
+      ansible.builtin.shell: pkill -9 ".*node_exporter.*"
+      ignore_errors: yes
+    - name: Remove node-exporter container if it is running on Docker
+      ansible.builtin.shell: docker rm -f node-exporter
+      ignore_errors: yes
+    - name: Remove existing node-exporter directory
+      ansible.builtin.file:
+        path: "{{ target_path }}"
+        state: absent
+    - name: Upload local node-exporter binary to target host
+      ansible.builtin.copy:
+        src: "{{ node_exporter_path }}/"
+        dest: "{{ target_path }}"
+        mode: 0700
+    - name: Copy node-exporter.service to /etc/systemd/system/
+      ansible.builtin.copy:
+        src: "{{ target_path }}/node-exporter.service"
+        dest: /etc/systemd/system/
+        remote_src: yes
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+    - name: Start node-exporter service
+      ansible.builtin.systemd:
+            name: node-exporter
+            state: started
+            enabled: yes

@@ -1,0 +1,9 @@
+[Unit]
+After=libvirtd.service
+
+[Service]
+ExecStart=/usr/local/node-exporter/start.sh
+ExecStop=/usr/local/node-exporter/stop.sh
+
+[Install]
+WantedBy=default.target
