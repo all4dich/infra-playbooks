@@ -1,0 +1,68 @@
+---
+- name: Upload Server Logs to S3
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    src_dir: "/tmp/kernel_logs/"
+    bucket_name: "{{ lookup('env', 'AWS_BUCKET_NAME', default='nota-infra-logs-archiving') }}"
+    region: "{{ lookup('env', 'AWS_REGION', default='ap-northeast-2') }}"
+    key_prefix : "server-logs"
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    # Remove directory if exists
+    - name: Remove Directory
+      file:
+        path: "{{ src_dir }}"
+        state: absent
+    - name: Create Directory
+      file:
+        path: "{{ src_dir }}"
+        state: directory
+        mode: '0755'
+    - name: Find logs fils
+      find:
+        paths: "/var/log/"
+        recurse: no
+        patterns:
+          - kern*
+          - auth*
+          - syslog*
+      register: files_to_copy
+    - name: Copy Kernel Logs
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ src_dir }}"
+        remote_src: yes
+      with_items: "{{ files_to_copy.files }}"
+    - name: Run gunzip on all files
+      shell: gunzip -r {{ src_dir }}
+    - name: Upload all files to S3 - kern.log
+      s3_sync:
+        bucket: "{{ bucket_name }}"
+        file_root: "{{ src_dir }}"
+        key_prefix: "{{ key_prefix }}/ {{ ansible_hostname | lower }}/kernel/"
+        region: "{{ region }}"
+        aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        include: "kern*"
+    - name: Upload all files to S3 - syslog
+      s3_sync:
+        bucket: "{{ bucket_name }}"
+        file_root: "{{ src_dir }}"
+        key_prefix: "{{ key_prefix }}/ {{ ansible_hostname | lower }}/system/"
+        region: "{{ region }}"
+        aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        include: "syslog*"
+    - name: Upload all files to S3 - auth
+      s3_sync:
+        bucket: "{{ bucket_name }}"
+        file_root: "{{ src_dir }}"
+        key_prefix: "{{ key_prefix }}/ {{ ansible_hostname | lower }}/authentication/"
+        region: "{{ region }}"
+        aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        include: "auth*"
