@@ -2,9 +2,10 @@ all:
   children:
     mybox:
       hosts:
-        10.169.1.87
+        tahoe:
+          ansible_host: "{{ lookup('env', 'TARGET_IP', default='tahoe') }}"
       vars:
-        ansible_user: ubuntu
-        ansible_password: ubuntu
-        ansible_become_password: ubuntu
+        ansible_user: "{{ lookup('env', 'ANSIBLE_USERNAME', default='ubuntu') }}"
+        ansible_password: "{{ lookup('env', 'ANSIBLE_PASSWORD', default='ubuntu') }}"
+        ansible_become_password: "{{ lookup('env', 'ANSIBLE_BECOME_PASSWORD', default='ubuntu')}}"
         ansible_python_interpreter: python3
