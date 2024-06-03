@@ -1,0 +1,31 @@
+name: Send Server Logs to AWS
+run-name: Send Server Logs to AWS
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+        target_host:
+            description: 'Set target host'
+            required: true
+            default: 'daejeon'
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.INFRA_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.INFRA_AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: 'ap-northeast-2'
+  ANSIBLE_USERNAME: ${{ secrets.ANSIBLE_USERNAME }}
+  ANSIBLE_PASSWORD: ${{ secrets.ANSIBLE_PASSWORD }}
+  ANSIBLE_BECOME_PASSWORD: ${{ secrets.ANSIBLE_BECOME_PASSWORD }}
+jobs:
+  Send-Server-Logs-To-AWS:
+    runs-on: nota-infra-manager
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          path: send-logs
+      - run: echo "🖥️ Run program"
+      - run: env
+      - run: bash -c '. ~/program/venv/bin/activate && ansible-playbook -i ansible/inventory/all-servers.yaml ansible/playbooks/server-upload-kernel-logs.yaml -e target_host=${{ inputs.target_host }}'
+        working-directory: send-logs
+      - run: echo "🍏 This job's status is ${{ job.status }}."
