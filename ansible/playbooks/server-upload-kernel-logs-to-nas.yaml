@@ -1,0 +1,42 @@
+---
+- name: Upload Server Logs to NAS
+  vars_prompt:
+    - name: target_host
+      prompt: "Set target host"
+      private: no
+  vars:
+    src_dir: "/tmp/kernel_logs/"
+    key_prefix: "{{ lookup('env', 'KEY_PREFIX', default='/mnt/nas/group/infra-management/log-archiving/server-logs') }}"
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    # Remove directory if exists
+    - name: Remove Directory
+      file:
+        path: "{{ src_dir }}"
+        state: absent
+    - name: Create Directory
+      file:
+        path: "{{ src_dir }}"
+        state: directory
+        mode: '0755'
+    - name: Find logs fils
+      find:
+        paths: "/var/log/"
+        recurse: no
+        patterns:
+          - kern*
+          - auth*
+          - syslog*
+      register: files_to_copy
+    - name: Copy Kernel Logs
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ src_dir }}"
+        remote_src: yes
+      with_items: "{{ files_to_copy.files }}"
+    - name: Upload all files to NAS
+      copy:
+        src: "{{ src_dir }}"
+        dest: "{{ key_prefix }}/{{ ansible_hostname | lower }}/"
+        remote_src: yes
