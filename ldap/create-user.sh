@@ -25,7 +25,7 @@ sambaNextUserRid=`ldapsearch -x -LLL  -H ldap://${LDAP_HOST} -b "$ROOT_DN" "(sam
 sambaSID_new=`echo $sambaSID | sed "s/${sambaSID_last}/${sambaNextUserRid}/"`
 echo "INFO: New sambaSID for a user ${username} = ${sambaSID_new}"
 
-ehco "INFO: Create a new user entry file(LDIF) for ${username}"
+echo "INFO: Create a new user entry file(LDIF) for ${username}"
 cat << EOF >  create-user.ldif
 # Define the new user entry
 dn: ${USER_DN}
