@@ -39,12 +39,15 @@
     - name: Create user directory on NAS
       become: yes
       ansible.builtin.file:
-          path: "/mnt/nas/people/{{ target_user }}"
+          path: "/mnt/{{ item }} /people/{{ target_user }}"
           state: directory
           owner: "{{ target_user }}"
           group: users
           mode: 0750
       ignore_errors: yes
+      with_list:
+        - nas
+        - work
     - name: Create a symlibic link /home/{{ target_user }} -> {{ user_home }}
       become: true
       file:
