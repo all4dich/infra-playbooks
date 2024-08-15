@@ -1,0 +1,17 @@
+services:
+    jenkins-infra-agent:
+        image: notadevteam/infra-jenkins-agent:latest
+        container_name: ${JENKINS_AGENT_NAME:-nota-agent-test}
+        platform: linux/amd64
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        volumes:
+        - /volume1/NotaBackup:/volume1/NotaBackup
+        - /volume1/Sensitive_Data:/volume1/Sensitive_Data
+        privileged: true
+        tty: true
+        user: group.infra_team
+        stdin_open: true
+        command: bash -c "cd /home/group.infra_team && curl -sO ${JENKINS_URL:-http://nota-storage-01.nota.ai:38080/}jnlpJars/agent.jar && java -jar agent.jar -url ${JENKINS_URL:-http://nota-storage-01.nota.ai:38080/} -secret ${JENKINS_AGENT_SECRET} -name \"${JENKINS_AGENT_NAME:-nota-agent-test}\" -workDir \"${JENKINS_AGENT_NAME:-nota-agent-test}\""
