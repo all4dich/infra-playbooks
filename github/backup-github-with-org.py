@@ -18,6 +18,7 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 REPO_TABLE = os.getenv('REPO_TABLE', 'github_backup_repositories')
 TARGET_DIR = os.getenv('TARGET_DIR')
 
+print(f"DB HOST: {DB_HOST}")
 
 class GithubBackupRepositories(Base):
     __tablename__ = REPO_TABLE
@@ -104,6 +105,8 @@ def get_repos_from_org(org_name):
                          "clone_url": clone_url,
                          "ssh_url": ssh_url, "created_at": created_at, "updated_at": yesterday,
                          "pushed_at": pushed_at_object})
+                else:
+                    print(f"Repo {repo_name} pushed_at is not greater than yesterday")
         page_number += 1
         url = f"{url_main}&page={page_number}"
         response = requests.get(url, headers={"Authorization": "token " + TOKEN})
