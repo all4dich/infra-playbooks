@@ -16,17 +16,29 @@ env:
   ANSIBLE_USERNAME: ${{ secrets.ANSIBLE_USERNAME }}
   ANSIBLE_PASSWORD: ${{ secrets.ANSIBLE_PASSWORD }}
   ANSIBLE_BECOME_PASSWORD: ${{ secrets.ANSIBLE_BECOME_PASSWORD }}
+  ANSIBLE_HOST_KEY_CHECKING: 'False'
   TARGET_HOST: ${{ inputs.target_host || 'daejeon' }}
 jobs:
   Send-Server-Logs-To-AWS:
     runs-on: nota-infra-manager
+    container:
+      image: python:3.12
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.INFRA_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.INFRA_AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'ap-northeast-2'
+        ANSIBLE_USERNAME: ${{ secrets.ANSIBLE_USERNAME }}
+        ANSIBLE_PASSWORD: ${{ secrets.ANSIBLE_PASSWORD }}
+        ANSIBLE_BECOME_PASSWORD: ${{ secrets.ANSIBLE_BECOME_PASSWORD }}
+        ANSIBLE_HOST_KEY_CHECKING: 'False'
+        TARGET_HOST: ${{ inputs.target_host || 'daejeon' }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           path: send-logs
       - run: echo "🖥️ Run program"
       - run: env
-      - run: bash -c '. ~/program/venv/bin/activate && ansible-playbook -i ansible/inventory/all-servers.yaml ansible/playbooks/server-upload-kernel-logs.yaml -e target_host=$TARGET_HOST'
+      - run: bash -c 'apt update -y && apt install -y sshpass && pip install ansible boto3 && ansible-playbook -i ansible/inventory/all-servers.yaml ansible/playbooks/server-upload-kernel-logs.yaml -e target_host=$TARGET_HOST'
         working-directory: send-logs
       - run: echo "🍏 This job's status is ${{ job.status }}."
