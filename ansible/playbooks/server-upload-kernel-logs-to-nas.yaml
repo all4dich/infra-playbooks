@@ -40,3 +40,7 @@
         src: "{{ src_dir }}"
         dest: "{{ key_prefix }}/{{ ansible_hostname | lower }}/"
         remote_src: yes
+    - name: Remove tmp directory
+      ansible.builtin.file:
+        path: "{{ src_dir }}"
+        state: absent
