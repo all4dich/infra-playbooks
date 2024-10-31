@@ -11,6 +11,7 @@ parser.add_argument("--username", required=True)
 parser.add_argument("--password", required=True)
 parser.add_argument("--url", required=True)
 parser.add_argument("--target_user", required=True)
+parser.add_argument("--clear", action="store_true", default=False)
 args = parser.parse_args()
 nexus_username = args.username
 nexus_password = args.password
@@ -199,5 +200,9 @@ def clear_account(user_name):
 if __name__ == "__main__":
     # get_privileges()
     # get_content_selectors()
-    register_account(args.target_user)
-    #clear_account("keonyul.park")
+    if not args.clear:
+        logging.info(f"Registering account for {args.target_user}")
+        register_account(args.target_user)
+    else:
+        logging.info(f"Clearing account for {args.target_user} from nexus")
+        clear_account(args.target_user)
