@@ -125,7 +125,7 @@ def create_role_for_docker_personal(target_user_name):
 # Update nexus role for the user
 def update_role_for_user(target_user_name, account_source="LDAP"):
     url = f"{nexus_url}/service/rest/v1/security/users/{target_user_name}"
-    user_roles = [f"nota-people-{target_user_name}", "nota-common"]
+    user_roles = [f"nota-people-{target_user_name}"]
     data = {
         "userId": target_user_name,
         "source": account_source,
@@ -152,6 +152,7 @@ def clear_account(user_name):
         "userId": user_name,
         "source": "LDAP",
         "roles": ["nx-anonymous"],
+        "privileges": [],
         "lastName": user_name.split(".")[1],
         "firstName": user_name.split(".")[0],
         "emailAddress": user_name + "@nota.ai",
@@ -192,9 +193,6 @@ def clear_account(user_name):
         logging.info(f"Successfully deleted content selector for {target_username}")
     else:
         logging.error(r.text)
-
-
-
 
 
 if __name__ == "__main__":
