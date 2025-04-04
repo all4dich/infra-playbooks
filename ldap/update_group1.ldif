@@ -1,0 +1,7 @@
+dn: cn=Directory Consumers,cn=groups,dc=nas-admin,dc=nota,dc=ai
+changetype: modify
+add: member
+member: uid=project.test_user,cn=users,dc=nas-admin,dc=nota,dc=ai
+-
+add: memberUid
+memberUid: project.test_user

@@ -3,7 +3,7 @@ import logging
 
 
 class NexusConnector:
-    def __init__(self, account=None, password=None, url=None):
+    def __init__(self, account="", password="", url=""):
         self.account = account
         self.password = password
         self.url = url

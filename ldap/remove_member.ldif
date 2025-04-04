@@ -1,0 +1,7 @@
+dn: cn=docker_in_beauty_dgx,cn=groups,dc=nas-admin,dc=nota,dc=ai
+changetype: modify
+delete: member
+member: uid=project.test_user,cn=users,dc=nas-admin,dc=nota,dc=ai
+-
+delete: memberUid
+memberUid: project.test_user

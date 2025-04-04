@@ -1,7 +1,7 @@
 import argparse
 import json
 import logging
-from nexus.src.main.python.nota.infra.nexus.account import NexusConnector
+from nexus.account import NexusConnector
 # Get username and password from arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--username", required=True)
@@ -14,6 +14,9 @@ nexus_password = args.password
 target_user = args.target_user
 nexus_url = args.url
 
+
+def helloworld():
+    print("Hello, world")
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)

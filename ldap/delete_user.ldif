@@ -1,0 +1,2 @@
+dn: uid=project.test_user,cn=users,dc=nas-admin,dc=nota,dc=ai
+changetype: delete
