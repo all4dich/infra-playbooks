@@ -1,0 +1,7 @@
+sf:
+  hosts:
+    ubuntu:
+      ansible_host: 192.168.20.131
+  vars:
+    ansible_user: sunjoo
+    ansible_shell_executable: /bin/bash

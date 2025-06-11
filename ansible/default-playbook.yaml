@@ -1,0 +1,6 @@
+---
+- name: Check hostname
+  hosts: ubuntu
+  tasks:
+    - name: Run `hostname` command
+      shell: pwd
