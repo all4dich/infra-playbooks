@@ -1,8 +1,8 @@
 name: Send Server Logs to NAS
 run-name: Send Server Logs to NAS
 on:
-  schedule:
-    - cron: '0 3 * * *'
+  #schedule:
+  #  - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
         target_host:

@@ -1,8 +1,8 @@
 name: Backup Github nota-github
 run-name: Backup Github nota-github
 on:
-  schedule:
-    - cron: '0 1 * * *'
+  #schedule:
+  #  - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
         org_name:

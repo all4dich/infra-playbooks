@@ -1,8 +1,8 @@
 name: Send Server Logs to AWS
 run-name: Send Server Logs to AWS
 on:
-  schedule:
-    - cron: '0 1 * * *'
+  #schedule:
+  #  - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
         target_host:

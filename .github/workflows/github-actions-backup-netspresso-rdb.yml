@@ -1,8 +1,8 @@
 name: Backup Netspresso RDB
 run-name: Backup Netspresso RDB
 on:
-  schedule:
-    - cron: '0 6 * * *'
+  #schedule:
+  #  - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
         org_name:

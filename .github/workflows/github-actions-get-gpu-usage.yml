@@ -1,8 +1,8 @@
 name: Get GPU Usage Data
 run-name: Get GPU Usage Data
-on:
-  schedule:
-    - cron: '0 4 * * *'
+#on:
+#  schedule:
+#    - cron: '0 4 * * *'
 jobs:
   Get-GPU-Usage-Data:
     runs-on: nota-infra-manager
