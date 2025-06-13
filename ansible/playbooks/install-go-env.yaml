@@ -1,0 +1,20 @@
+---
+- name: Install Go environment
+  hosts: ubuntu2
+  tasks:
+    - name: Remove old Go root directory
+      file:
+        state: absent
+        path: /usr/local/go
+    - name: Remove old downloaded files
+      file:
+        state: absent
+        path: /tmp/go1.24.4.linux-amd64.tar.gz
+    - name: Download Go tarball
+      ansible.builtin.get_url:
+        url: https://go.dev/dl/go1.24.4.linux-amd64.tar.gz
+        dest: /tmp/go1.24.4.linux-amd64.tar.gz
+  vars:
+    ansible_become_password: sunjoo
+
+# https://go.dev/dl/go1.24.4.linux-amd64.tar.gz
