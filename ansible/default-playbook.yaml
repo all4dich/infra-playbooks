@@ -1,6 +1,19 @@
 ---
-- name: Check hostname
+- name: Check Ansible Functions
   hosts: ubuntu
   tasks:
     - name: Run `hostname` command
-      shell: pwd
+      shell: ls -al
+      register: hostname_output
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+      become: yes
+    - name: Install vim
+      ansible.builtin.apt:
+        name: vim
+        state: present
+      become: yes
+  vars:
+    ansible_become_password: sunjoo
+
