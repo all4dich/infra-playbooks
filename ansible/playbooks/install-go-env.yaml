@@ -38,4 +38,9 @@
     go_tarball_name: "go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
     # Set the Go download URL based on architecture
     go_download_url: "https://go.dev/dl/go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
-    go_target_directory: "{{ '~/.local' if ansible_os_family == 'linux' else '~/program' }}"
+    go_target_directory: >
+      {% if ansible_os_family == 'linux' %}
+      ~/.local
+      {% else %}
+      ~/program
+      {% endif %}
