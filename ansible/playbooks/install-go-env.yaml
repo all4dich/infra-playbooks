@@ -1,17 +1,17 @@
 ---
 - name: Install Go environment
-  hosts: sf
+  hosts: all
   tasks:
-    - name: Print all facts
-      debug:
-        var: ansible_facts
     - name: Run `apt-get update`
       apt:
+        state: present
         update_cache: yes
+      when: ansible_distribution == 'Ubuntu'
+      become: true
     - name: Remove old Go root directory
       file:
         state: absent
-        path: /usr/local/go
+        path: "{{ go_target_directory }}/go"
     - name: Remove old downloaded files
       file:
         state: absent
@@ -20,11 +20,14 @@
       get_url:
         url: https://go.dev/dl/{{ go_tarball_name }}
         dest: /tmp/{{ go_tarball_name }}
-    - name: Extract Go tarball
-      unarchive:
-        src: /tmp/{{ go_tarball_name }}
-        dest: /usr/local
-        remote_src: yes
+    - name: Make go_target_directory
+      file:
+        state: directory
+        path : "{{ go_target_directory }}"
+    - name: Extract Go tarball using tar command
+      command: "tar -C {{ go_target_directory }} -xzf /tmp/{{ go_tarball_name }}"
+      args:
+        creates: "{{ go_target_directory }}/go"
   vars:
     ansible_become_password: sunjoo
     ansible_os_family: "{{ ansible_facts['system'] | lower }}"
@@ -35,3 +38,4 @@
     go_tarball_name: "go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
     # Set the Go download URL based on architecture
     go_download_url: "https://go.dev/dl/go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
+    go_target_directory: "{{ '~/.local' if ansible_os_family == 'linux' else '~/program' }}"
