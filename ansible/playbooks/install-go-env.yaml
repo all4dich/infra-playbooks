@@ -14,6 +14,11 @@
       ansible.builtin.get_url:
         url: https://go.dev/dl/go1.24.4.linux-amd64.tar.gz
         dest: /tmp/go1.24.4.linux-amd64.tar.gz
+    - name: Extract Go tarball
+      ansible.builtin.unarchive:
+        src: /tmp/go1.24.4.linux-amd64.tar.gz
+        dest: /usr/local
+        remote_src: yes
   vars:
     ansible_become_password: sunjoo
 

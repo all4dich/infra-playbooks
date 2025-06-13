@@ -2,6 +2,9 @@ sf:
   hosts:
     ubuntu:
       ansible_host: 192.168.20.131
+    ubuntu2:
+      ansible_host: 192.168.20.132
   vars:
     ansible_user: sunjoo
     ansible_shell_executable: /bin/bash
+    ansible_become_password: sunjoo
