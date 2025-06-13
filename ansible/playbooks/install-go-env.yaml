@@ -1,7 +1,13 @@
 ---
 - name: Install Go environment
-  hosts: ubuntu2
+  hosts: sf
   tasks:
+    - name: Print all facts
+      debug:
+        var: ansible_facts
+    - name: Run `apt-get update`
+      apt:
+        update_cache: yes
     - name: Remove old Go root directory
       file:
         state: absent
@@ -9,17 +15,23 @@
     - name: Remove old downloaded files
       file:
         state: absent
-        path: /tmp/go1.24.4.linux-amd64.tar.gz
+        path: /tmp/{{ go_tarball_name }}
     - name: Download Go tarball
-      ansible.builtin.get_url:
-        url: https://go.dev/dl/go1.24.4.linux-amd64.tar.gz
-        dest: /tmp/go1.24.4.linux-amd64.tar.gz
+      get_url:
+        url: https://go.dev/dl/{{ go_tarball_name }}
+        dest: /tmp/{{ go_tarball_name }}
     - name: Extract Go tarball
-      ansible.builtin.unarchive:
-        src: /tmp/go1.24.4.linux-amd64.tar.gz
+      unarchive:
+        src: /tmp/{{ go_tarball_name }}
         dest: /usr/local
         remote_src: yes
   vars:
     ansible_become_password: sunjoo
-
-# https://go.dev/dl/go1.24.4.linux-amd64.tar.gz
+    ansible_os_family: "{{ ansible_facts['system'] | lower }}"
+    ansible_architecture: "{{ (ansible_facts['architecture'] | lower) | replace('aarch64', 'arm64') }}"
+    # Set the Go version to install
+    go_version: "1.24.4"
+    # Set the go tarball name based on the version
+    go_tarball_name: "go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
+    # Set the Go download URL based on architecture
+    go_download_url: "https://go.dev/dl/go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
