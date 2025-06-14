@@ -33,14 +33,16 @@
     ansible_os_family: "{{ ansible_facts['system'] | lower }}"
     ansible_architecture: "{{ (ansible_facts['architecture'] | lower) | replace('aarch64', 'arm64') }}"
     # Set the Go version to install
-    go_version: "1.24.4"
+    go_version: "{{ lookup('env', 'GO_VERSION') | default('1.24.4', true) }}"
     # Set the go tarball name based on the version
     go_tarball_name: "go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
     # Set the Go download URL based on architecture
     go_download_url: "https://go.dev/dl/go{{ go_version }}.{{ ansible_os_family }}-{{ ansible_architecture }}.tar.gz"
     go_target_directory: >
       {% if ansible_os_family == 'linux' %}
-      ~/.local
+      {{ ansible_user_dir }}/.local
+      {% elif ansible_os_family == 'darwin' %}
+      {{ ansible_user_dir }}/Library
       {% else %}
       ~/program
       {% endif %}
