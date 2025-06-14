@@ -1,7 +1,7 @@
 sf:
   hosts:
     ubuntu:
-      ansible_host: 192.168.20.131
+      ansible_host: 192.168.20.130
     ubuntu2:
       ansible_host: 192.168.20.132
   vars:
