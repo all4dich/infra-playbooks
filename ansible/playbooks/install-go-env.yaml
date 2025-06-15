@@ -1,0 +1,93 @@
+---
+- name: Install Go environment
+  hosts: "{{ lookup('env', 'ANSIBLE_HOST') | default('all', true) }}"
+  tasks:
+    - name: Ensure common build tools and dependencies are installed (Debian-based)
+      ansible.builtin.apt:
+        name:
+          - curl
+          - gnupg
+          - g++
+          - unzip
+          - zip
+          - pkg-config
+          - python3
+        state: present
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian"
+      become: true
+    - name: Install required yum/dnf plugins for COPR (RedHat-based)
+      ansible.builtin.yum:
+        name: dnf-plugins-core
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+    - name: Enable Bazel COPR repository (RedHat-based)
+      ansible.builtin.command: dnf copr enable -y vbatts/bazel
+      args:
+        creates: /etc/yum.repos.d/_copr_vbatts-bazel.repo
+      when: ansible_facts['os_family'] == "RedHat"
+    - name: Ensure common build tools and dependencies are installed (RedHat-based)
+      ansible.builtin.yum:
+        name:
+          - gcc-c++
+          - unzip
+          - zip
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+    - name: Make go_target_directory
+      ansible.builtin.file:
+        path : "{{ go_target_directory }}"
+        state: directory
+    - name: Remove old Go root directory
+      file:
+        state: absent
+        path: "{{ go_target_directory }}/go"
+    - name: Remove old Go downloaded files
+      file:
+        state: absent
+        path: /tmp/{{ go_tarball_name }}
+    - name: Download Go tarball
+      get_url:
+        url: "{{ go_download_url }}"
+        dest: "/tmp/{{ go_tarball_name }}"
+    - name: Extract Go tarball using tar command
+      command: "tar -C {{ go_target_directory }} -xzf /tmp/{{ go_tarball_name }}"
+      args:
+        creates: "{{ go_target_directory }}/go"
+    - name: Make bazel target directory
+      file:
+        path: "{{ bazel_target_dir }}"
+        state: directory
+    - name: Remove old Bazel binary
+      file:
+        state: absent
+        path: "{{ bazel_target_dir}}/bazel"
+    - name: Download Bazel single binary
+      get_url:
+        url: "{{ bazel_download_url }}"
+        dest: "{{ bazel_target_dir}}/bazel"
+    - name: Add execution permission to bazel binary
+      file:
+        path: "{{ bazel_target_dir}}/bazel"
+        state: file
+        mode: 0755
+  vars:
+    ansible_os_system: "{{ ansible_facts['system'] | lower }}"
+    ansible_architecture: "{{ (ansible_facts['architecture'] | lower) | replace('aarch64', 'arm64') }}"
+    # Set the Go version to install
+    go_version: "{{ lookup('env', 'GO_VERSION') | default('1.24.4', true) }}"
+    # Set the go tarball name based on the version
+    go_tarball_name: "go{{ go_version }}.{{ ansible_os_system}}-{{ ansible_architecture }}.tar.gz"
+    # Set the Go download URL based on architecture
+    go_download_url: "https://go.dev/dl/go{{ go_version }}.{{ ansible_os_system}}-{{ ansible_architecture }}.tar.gz"
+    go_target_directory: >-
+      {%- if ansible_facts['os_family'] == "Debian" -%}
+      {{ (ansible_user_dir + '/.local') }}
+      {%- elif ansible_facts['os_family'] == "Darwin" -%}
+      {{ (ansible_user_dir + '/Library') }}
+      {%- else -%}
+      {{ ('~/program') }}
+      {% endif %}
+    bazel_version: "{{ lookup('env', 'BAZEL_VERSION') | default('8.2.1', true) }}"
+    bazel_download_url: "https://github.com/bazelbuild/bazel/releases/download/{{ bazel_version }}/bazel-{{ bazel_version }}-{{ ansible_os_system }}-{{ ansible_architecture }}"
+    bazel_target_dir: "{{ ansible_user_dir }}/.local/bin"
