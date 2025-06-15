@@ -1,6 +1,6 @@
 ---
 - name: Install Go environment
-  hosts: all
+  hosts: "{{ lookup('env', 'ANSIBLE_HOST') | default('all', true) }}"
   tasks:
     - name: Ensure common build tools and dependencies are installed (Debian-based)
       ansible.builtin.apt:
@@ -72,7 +72,6 @@
         state: file
         mode: 0755
   vars:
-    ansible_become_password: "{{ lookup('env', 'ANSIBLE_BECOME_PASSWORD') | default('', true) }}"
     ansible_os_system: "{{ ansible_facts['system'] | lower }}"
     ansible_architecture: "{{ (ansible_facts['architecture'] | lower) | replace('aarch64', 'arm64') }}"
     # Set the Go version to install
