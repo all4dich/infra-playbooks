@@ -1,19 +1,10 @@
 ---
 - name: Check Ansible Functions
-  hosts: ubuntu
+  hosts: all
   tasks:
-    - name: Run `hostname` command
-      shell: ls -al
-      register: hostname_output
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: yes
-      become: yes
-    - name: Install vim
-      ansible.builtin.apt:
-        name: vim
-        state: present
-      become: yes
+    - name: Print all facts
+      debug:
+        var: go_target_directory
   vars:
-    ansible_become_password: sunjoo
-
+    go_target_directory: >-
+      {% if ansible_facts['os_family'] == "Debian" %}{{ (ansible_user_dir + '/.local') }}{% elif ansible_facts['os_family'] == "Darwin" %}{{ (ansible_user_dir + '/Library') }}{% else %}{{ ('~/program') }}{% endif %}
