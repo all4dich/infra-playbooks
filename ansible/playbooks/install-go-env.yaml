@@ -48,8 +48,8 @@
         path: /tmp/{{ go_tarball_name }}
     - name: Download Go tarball
       get_url:
-        url: https://go.dev/dl/{{ go_tarball_name }}
-        dest: /tmp/{{ go_tarball_name }}
+        url: "{{ go_download_url }}"
+        dest: "/tmp/{{ go_tarball_name }}"
     - name: Extract Go tarball using tar command
       command: "tar -C {{ go_target_directory }} -xzf /tmp/{{ go_tarball_name }}"
       args:
@@ -72,7 +72,7 @@
         state: file
         mode: 0755
   vars:
-    ansible_become_password: sunjoo
+    ansible_become_password: "{{ lookup('env', 'ANSIBLE_BECOME_PASSWORD') | default('', true) }}"
     ansible_os_system: "{{ ansible_facts['system'] | lower }}"
     ansible_architecture: "{{ (ansible_facts['architecture'] | lower) | replace('aarch64', 'arm64') }}"
     # Set the Go version to install
