@@ -4,6 +4,8 @@ sf:
       ansible_host: 192.168.20.130
     ubuntu2:
       ansible_host: 192.168.20.132
+    ubuntu-2204:
+      ansible_host: 192.168.20.133
   vars:
     ansible_user: sunjoo
     ansible_shell_executable: /bin/bash

@@ -81,7 +81,14 @@
     go_tarball_name: "go{{ go_version }}.{{ ansible_os_system}}-{{ ansible_architecture }}.tar.gz"
     # Set the Go download URL based on architecture
     go_download_url: "https://go.dev/dl/go{{ go_version }}.{{ ansible_os_system}}-{{ ansible_architecture }}.tar.gz"
-    go_target_directory: "{{ ansible_user_dir }}/.local"
+    go_target_directory: >-
+      {%- if ansible_facts['os_family'] == "Debian" -%}
+      {{ (ansible_user_dir + '/.local') }}
+      {%- elif ansible_facts['os_family'] == "Darwin" -%}
+      {{ (ansible_user_dir + '/Library') }}
+      {%- else -%}
+      {{ ('~/program') }}
+      {% endif %}
     bazel_version: "{{ lookup('env', 'BAZEL_VERSION') | default('8.2.1', true) }}"
     bazel_download_url: "https://github.com/bazelbuild/bazel/releases/download/{{ bazel_version }}/bazel-{{ bazel_version }}-{{ ansible_os_system }}-{{ ansible_architecture }}"
     bazel_target_dir: "{{ ansible_user_dir }}/.local/bin"
