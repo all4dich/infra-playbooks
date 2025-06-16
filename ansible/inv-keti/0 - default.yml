@@ -1,0 +1,11 @@
+nvidia:
+  hosts:
+    agxorin1:
+      ansible_host: 192.168.0.216
+      ansible_user: ubuntu
+      ansible_become_password: "{{ lookup('env', 'ANSIBLE_AGXORIN1_PASSWORD') | default('', true) }}"
+rbp:
+  hosts:
+    hawkhill:
+      ansible_host: 192.168.0.44
+      ansible_user: sunjoo
