@@ -3,25 +3,29 @@
   hosts: 127.0.0.1
   connection: local
   tasks:
-    - name: Print all facts
-      debug:
-        var: go_target_directory
-    - name: Print all facts
-      debug:
-        var: second_var
-    - name: third
-      debug:
-        var: third_var
-    - name: Run a shell command and capture output
-      shell: env
-      register: shell_output
-    - name: Print shell command output
-      debug:
-        msg: "{{ shell_output.stdout.splitlines() }}"
-    - name: ansible_env
-      debug:
-        msg: "{{ ansible_facts }}"
+#    - name: Print all facts
+#      debug:
+#        var: go_target_directory
+#    - name: Print all facts
+#      debug:
+#        var: second_var
+#    - name: third
+#      debug:
+#        var: third_var
+#    - name: Run a shell command and capture output
+#      shell: env
+#      register: shell_output
+#    - name: Print shell command output
+#      debug:
+#        msg: "{{ shell_output.stdout.splitlines() }}"
+#    - name: ansible_env
+#      debug:
+#        msg: "{{ ansible_facts['en0']['ipv4'][0]['address'] if ansible_facts['en0']['macaddress'] == 'b2:71:03:3b:3f:97' }}"
+    - name: Get Default Interface ipv4
+      ansible.builtin.debug:
+        msg: "{{ get_default_ipv4 }}"
   vars:
+    get_default_ipv4: "{{ ansible_default_ipv4['address'] }}"
     go_target_directory: >-
       {%- if ansible_facts['os_family'] == "Debian" -%}
       {{ (ansible_user_dir + '/.local') }}
