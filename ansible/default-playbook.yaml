@@ -1,6 +1,6 @@
 ---
 - name: Check Ansible Functions
-  hosts: local
+  hosts: all
   tasks:
     - name: Print all facts
       debug:
