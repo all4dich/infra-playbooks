@@ -18,6 +18,9 @@
     - name: Print shell command output
       debug:
         msg: "{{ shell_output.stdout.splitlines() }}"
+    - name: ansible_env
+      debug:
+        msg: "{{ ansible_facts }}"
   vars:
     go_target_directory: >-
       {%- if ansible_facts['os_family'] == "Debian" -%}
