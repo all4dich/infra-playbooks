@@ -1,0 +1,38 @@
+---
+- name: Check Ansible Functions
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: Print all facts
+      debug:
+        var: go_target_directory
+    - name: Print all facts
+      debug:
+        var: second_var
+    - name: third
+      debug:
+        var: third_var
+    - name: Run a shell command and capture output
+      shell: env
+      register: shell_output
+    - name: Print shell command output
+      debug:
+        msg: "{{ shell_output.stdout.splitlines() }}"
+  vars:
+    go_target_directory: >-
+      {%- if ansible_facts['os_family'] == "Debian" -%}
+      {{ (ansible_user_dir + '/.local') }}
+      {%- elif ansible_facts['os_family'] == "Darwin" -%}
+      {{ (ansible_user_dir + '/Library') }}
+      {%- else -%}
+      {{ ('~/program') }}
+      {% endif %}
+    second_var: |-
+      {%- if ansible_facts['os_family'] == "Debian" -%}
+      {{ (ansible_user_dir + '/.local') }}
+      {%- elif ansible_facts['os_family'] == "Darwin" -%}
+      {{ (ansible_user_dir + '/Library') }}
+      {%- else -%}
+      {{ ('~/program') }}
+      {% endif %}
+    third_var: test
