@@ -75,6 +75,13 @@
       args:
         creates: /etc/containerd/config.toml
 
+    - name: Ensure CRI plugin is enabled in containerd
+      ansible.builtin.lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: '^\s*disabled_plugins = \["cri"\]'
+        line: '# disabled_plugins = ["cri"]'
+        state: present
+
     - name: Restart and enable containerd service
       ansible.builtin.systemd:
         name: containerd
@@ -82,15 +89,14 @@
         enabled: yes
         daemon_reload: yes
 
-    - name: Add Google's APT signing key for Kubernetes
-      ansible.builtin.get_url:
-        url: "https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key"
-        dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-        mode: '0644'
+    - name: Download and add Google's APT signing key for Kubernetes
+      ansible.builtin.shell: "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+      args:
+        creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
     - name: Add Kubernetes APT repository
       ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
         state: present
         filename: kubernetes
 
@@ -111,7 +117,6 @@
         - kubelet
         - kubeadm
         - kubectl
-
 #
 # Play 2: Initialize the Kubernetes Master Node
 # This play runs ONLY on the master node.
@@ -126,7 +131,7 @@
       failed_when: "kubeadm_reset_result.rc != 0 and 'could not find a JNI environment' not in kubeadm_reset_result.stderr"
 
     - name: Initialize the Kubernetes cluster with kubeadm
-      ansible.builtin.command: "kubeadm init --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock"
+      ansible.builtin.command: "kubeadm init --pod-network-cidr=10.10.0.0/16 --cri-socket=unix:///run/containerd/containerd.sock"
       register: kubeadm_init_result
 
     - name: Create .kube directory for the user
