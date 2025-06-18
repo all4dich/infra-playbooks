@@ -1,0 +1,16 @@
+master:
+  hosts:
+    ubuntu-2404:
+      ansible_host: 192.168.20.130
+      ansible_user: sunjoo
+      ansible_become_password: sunjoo
+workers:
+  hosts:
+    ubuntu2:
+      ansible_host: 192.168.20.132
+      ansible_user: sunjoo
+      ansible_become_password: sunjoo
+    ubuntu2204:
+      ansible_host : 192.168.20.133
+      ansible_user: sunjoo
+      ansible_become_password: sunjoo

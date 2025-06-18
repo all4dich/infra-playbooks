@@ -30,12 +30,12 @@
   vars:
     get_default_ipv4: "{{ ansible_default_ipv4['address'] }}"
     rbp5_address: >-
-      {%- if get_default_ipv4 | ansible.utils.ipsubnet('192.168.0.0/24') -%}
+      {%- if get_default_ipv4.startswith('192.168.0.') -%}
       192.168.0.35
-      {%- elif get_default_ipv4 | ansible.utils.ipsubnet('192.168.50.0/24') -%}
+      {%- elif get_default_ipv4.startswith('192.168.50.') -%}
       192.168.50.59
       {%- else -%}
-      {{ get_default_ipv4 }}
+      {{ ip_addr | default('0.0.0.0') }}
       {%- endif -%}
     go_target_directory: >-
       {%- if ansible_facts['os_family'] == "Debian" -%}
