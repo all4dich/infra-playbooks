@@ -1,0 +1,19 @@
+master:
+  hosts:
+    k8s-master:
+      ansible_host: 192.168.64.4
+      ansible_user: sunjoo
+      ansible_password: sunjoo
+      ansible_become_password: sunjoo
+workers:
+  hosts:
+    ubuntu-2404:
+      ansible_host: 192.168.64.5
+    ubuntu-2404-2:
+      ansible_host: 192.168.64.7
+    ubuntu-2404-3:
+      ansible_host: 192.168.64.8
+  vars:
+    ansible_user: sunjoo
+    ansible_password: sunjoo
+    ansible_become_password: sunjoo
