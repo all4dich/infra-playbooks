@@ -10,8 +10,11 @@ rbp:
       ansible_host: 192.168.0.44
       ansible_user: sunjoo
     slackers:
-      ansible_host : 192.168.0.57
+      ansible_host: 192.168.0.57
       ansible_user: pi
     lombard:
       ansible_host : 192.168.0.5
       ansible_user: pi
+    muirwoods:
+      ansible_host: 192.168.0.35
+      ansible_user: sunjoo
