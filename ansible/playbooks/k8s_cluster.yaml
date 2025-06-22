@@ -71,9 +71,12 @@
         mode: '0755'
 
     - name: Generate containerd config and enable SystemdCgroup
-      ansible.builtin.shell: "containerd config default > /etc/containerd/config.toml && sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml"
-      args:
-        creates: /etc/containerd/config.toml
+      ansible.builtin.shell: |
+        containerd config default | tee /etc/containerd/config.toml
+
+    - name: Enable SystemdCgroup
+      ansible.builtin.shell: |
+        sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 
     - name: Ensure CRI plugin is enabled in containerd
       ansible.builtin.lineinfile:
@@ -117,6 +120,10 @@
         - kubelet
         - kubeadm
         - kubectl
+    - name: Set crictl's runtime endpoint to containerd
+      ansible.builtin.shell: |
+        crictl config --set runtime-endpoint=unix:///run/containerd/containerd.sock --set image-endpoint=unix:///run/containerd/containerd.sock
+
 #
 # Play 2: Initialize the Kubernetes Master Node
 # This play runs ONLY on the master node.
@@ -131,7 +138,7 @@
       failed_when: "kubeadm_reset_result.rc != 0 and 'could not find a JNI environment' not in kubeadm_reset_result.stderr"
 
     - name: Initialize the Kubernetes cluster with kubeadm
-      ansible.builtin.command: "kubeadm init --pod-network-cidr=10.10.0.0/16 --cri-socket=unix:///run/containerd/containerd.sock"
+      ansible.builtin.command: "kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4['address'] }} --pod-network-cidr=10.10.0.0/16 --cri-socket=unix:///run/containerd/containerd.sock"
       register: kubeadm_init_result
 
     - name: Create .kube directory for the user

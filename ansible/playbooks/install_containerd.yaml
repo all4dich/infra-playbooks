@@ -9,7 +9,7 @@
 # It is idempotent and can be safely run multiple times.
 #
 - name: Install containerd from Docker's official repository
-  hosts: all
+  hosts: "{{ lookup('env','TARGET_HOST') | default('all', true) }}"
   become: yes
   tasks:
     - name: 1. Update apt cache and install prerequisite packages
