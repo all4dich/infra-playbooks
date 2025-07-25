@@ -1,0 +1,23 @@
+- name: Install Kubeflow
+  hosts: master
+  gather_facts: false
+  vars:
+    kubeflow_manifests_repo: "https://github.com/kubeflow/manifests.git"
+    kubeflow_manifests_tag: "v1.10.1" # You can change this to your desired tag
+  tasks:
+    - name: Clone Kubeflow manifests repository
+      ansible.builtin.git:
+        repo: "{{ kubeflow_manifests_repo }}"
+        dest: "{{ ansible_user_dir }}/kubeflow-manifests"
+        version: "{{ kubeflow_manifests_tag }}"
+        single_branch: true
+
+    - name: Apply Kubeflow manifests
+      ansible.builtin.command:
+        cmd: "kubectl apply -k {{ ansible_user_dir }}/kubeflow-manifests/example"
+      register: kubeflow_install_output
+      changed_when: kubeflow_install_output.rc == 0
+
+    - name: Display Kubeflow installation output
+      ansible.builtin.debug:
+        var: kubeflow_install_output.stdout_lines
