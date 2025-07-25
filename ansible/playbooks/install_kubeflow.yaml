@@ -1,10 +1,31 @@
 - name: Install Kubeflow
   hosts: master
-  gather_facts: false
+  gather_facts: true
   vars:
     kubeflow_manifests_repo: "https://github.com/kubeflow/manifests.git"
     kubeflow_manifests_tag: "v1.10.1" # You can change this to your desired tag
   tasks:
+    - name: Remove existing pv, pvc
+      ansible.builtin.shell: |
+        kubectl delete pv,pvc --all
+
+    - name: Read and modify pv-nfs.yaml
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/files/pv-nfs.yaml.j2"
+        dest: "{{ ansible_user_dir }}/pv-nfs-modified.yaml"
+      vars:
+        nfs_server_ip: "{{ ansible_default_ipv4['address'] }}"
+
+    - name: Apply modified pv-nfs.yaml
+      ansible.builtin.command:
+        cmd: "kubectl apply -f {{ ansible_user_dir }}/pv-nfs-modified.yaml"
+      register: pv_nfs_apply_output
+      changed_when: pv_nfs_apply_output.rc == 0
+
+    - name: Display pv-nfs apply output
+      ansible.builtin.debug:
+        var: pv_nfs_apply_output.stdout_lines
+
     - name: Clone Kubeflow manifests repository
       ansible.builtin.git:
         repo: "{{ kubeflow_manifests_repo }}"
@@ -16,7 +37,7 @@
       ansible.builtin.command:
         cmd: "kubectl apply -k {{ ansible_user_dir }}/kubeflow-manifests/example"
       register: kubeflow_install_output
-      changed_when: kubeflow_install_output.rc == 0
+      failed_when: false
 
     - name: Display Kubeflow installation output
       ansible.builtin.debug:

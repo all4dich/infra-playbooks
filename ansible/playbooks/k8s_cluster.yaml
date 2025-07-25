@@ -99,7 +99,7 @@
 
     - name: Add Kubernetes APT repository
       ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
         state: present
         filename: kubernetes
 
@@ -158,6 +158,7 @@
         - mysql
         - minio
         - katib-mysql
+        - authservice
 
     - name: Ensure export entry is present
       ansible.builtin.lineinfile:
@@ -184,6 +185,14 @@
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
         apt-get update -y
         apt-get install helm -y
+
+    - name: Install Kustomize
+      ansible.builtin.shell: |
+        rm -rfv /usr/local/bin/kustomize
+        rm -rfv /tmp/install_kustomize.sh
+        curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh -o /tmp/install_kustomize.sh
+        chmod +x /tmp/install_kustomize.sh
+        /tmp/install_kustomize.sh 5.4.3 /usr/local/bin
 
     - name: Reset existing kubeadm cluster if present
       ansible.builtin.command: kubeadm reset -f
@@ -228,6 +237,10 @@
       become: no # Run as the user, not root
       changed_when: false
 
+    - name: Enable to schedule Pods on the control plane
+      ansible.builtin.shell: |
+         kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+      become: no
 #
 # Play 3: Join Worker Nodes to the Cluster
 # This play runs ONLY on the worker nodes.
