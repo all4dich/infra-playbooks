@@ -57,6 +57,9 @@
           - ca-certificates
           - curl
           - gnupg
+          - vim
+          - build-essential
+          - tmux
         state: present
 
     - name: Install containerd (container runtime)
@@ -91,6 +94,11 @@
         state: restarted
         enabled: yes
         daemon_reload: yes
+
+    - name: Remove old kubernetes apt repository file
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/kubernetes.list
+        state: absent
 
     - name: Download and add Google's APT signing key for Kubernetes
       ansible.builtin.shell: "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
@@ -156,7 +164,7 @@
         mode: '0777'
       loop:
         - mysql
-        - minio
+        - mini
         - katib-mysql
         - authservice
 
@@ -192,7 +200,7 @@
         rm -rfv /tmp/install_kustomize.sh
         curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh -o /tmp/install_kustomize.sh
         chmod +x /tmp/install_kustomize.sh
-        /tmp/install_kustomize.sh 5.4.3 /usr/local/bin
+        /tmp/install_kustomize.sh 5.2.1 /usr/local/bin
 
     - name: Reset existing kubeadm cluster if present
       ansible.builtin.command: kubeadm reset -f
@@ -231,7 +239,7 @@
         value: "{{ kubeadm_join_command.stdout }}"
 
     - name: Apply Calico CNI for pod networking
-      ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
+      ansible.builtin.command: kubectl apply -f https://raw.githubusercodf tent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
       environment:
         KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
       become: no # Run as the user, not root
@@ -241,7 +249,30 @@
       ansible.builtin.shell: |
          kubectl taint nodes --all node-role.kubernetes.io/control-plane-
       become: no
-#
+
+    - name: Install Metallb
+      ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+      become: no
+
+    - name: Wait for 60 seconds
+      ansible.builtin.pause:
+        seconds: 60
+
+    - name: Read and Modify IP Pool Manifest
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/files/ip-pool.yaml.j2"
+        dest: "/tmp/ip-pool-modified.yaml"
+      vars:
+        IP_RANGE: "192.168.0.240-192.168.0.250"
+      become: no
+
+    - name: Apply IP Pool Manifest
+      ansible.builtin.command:
+        cmd: "kubectl apply -f /tmp/ip-pool-modified.yaml"
+      register: ip_pool_apply_output
+      changed_when: ip_pool_apply_output.rc == 0
+      become: no
+
 # Play 3: Join Worker Nodes to the Cluster
 # This play runs ONLY on the worker nodes.
 #

@@ -1,0 +1,12 @@
+- name: Install Kubeflow
+  hosts: master
+  vars:
+    kubeflow_manifests_repo: "https://github.com/kubeflow/manifests.git"
+    kubeflow_manifests_tag: "v1.10.1" # You can change this to your desired tag
+  tasks:
+    - name: Read and modify pv-nfs.yaml
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/files/pv-nfs.yaml.j2"
+        dest: "{{ ansible_user_dir }}/pv-nfs-modified.yaml"
+      vars:
+        nfs_server_ip: "{{ ansible_default_ipv4['address'] }}"

@@ -3,7 +3,7 @@
   gather_facts: true
   vars:
     kubeflow_manifests_repo: "https://github.com/kubeflow/manifests.git"
-    kubeflow_manifests_tag: "v1.10.1" # You can change this to your desired tag
+    kubeflow_manifests_tag: "v1.9.1" # You can change this to your desired tag
   tasks:
     - name: Remove existing pv, pvc
       ansible.builtin.shell: |
@@ -33,12 +33,13 @@
         version: "{{ kubeflow_manifests_tag }}"
         single_branch: true
 
-    - name: Apply Kubeflow manifests
-      ansible.builtin.command:
-        cmd: "kubectl apply -k {{ ansible_user_dir }}/kubeflow-manifests/example"
-      register: kubeflow_install_output
-      failed_when: false
-
-    - name: Display Kubeflow installation output
-      ansible.builtin.debug:
-        var: kubeflow_install_output.stdout_lines
+# while ! kustomize build example | kubectl apply -f -; do echo "Retrying to apply resources"; sleep 20; done
+#    - name: Apply Kubeflow manifests
+#      ansible.builtin.command:
+#        cmd: "kubectl apply -k {{ ansible_user_dir }}/kubeflow-manifests/example"
+#      register: kubeflow_install_output
+#      failed_when: false
+#
+#    - name: Display Kubeflow installation output
+#      ansible.builtin.debug:
+#        var: kubeflow_install_output.stdout_lines

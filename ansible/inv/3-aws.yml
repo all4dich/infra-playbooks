@@ -1,0 +1,18 @@
+master:
+  hosts:
+    k8s-master:
+      ansible_host: 43.200.244.31
+      ansible_user: ubuntu
+      #ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i /Users/sunjoo/.ssh/all4dich-ec2key-on-n.cali.pem'
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i /Users/sunjoo/.ssh/all4dich-aws-key.pem'
+workers:
+  hosts:
+    k8s-worker1:
+      ansible_host: 13.125.97.28
+      ansible_user: ubuntu
+      #ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i /Users/sunjoo/.ssh/all4dich-ec2key-on-n.cali.pem'
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i /Users/sunjoo/.ssh/all4dich-aws-key.pem'
+ #   k8s-worker2:
+ #     ansible_host: 54.193.63.43
+ #     ansible_user: ubuntu
+ #     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i  /Users/sunjoo/.ssh/all4dich-ec2key-on-n.cali.pem'

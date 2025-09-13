@@ -11,8 +11,8 @@ workers:
       ansible_host: 192.168.64.5
     ubuntu-2404-2:
       ansible_host: 192.168.64.7
-    ubuntu-2404-3:
-      ansible_host: 192.168.64.8
+#    ubuntu-2404-3:
+#      ansible_host: 192.168.64.8
   vars:
     ansible_user: sunjoo
     ansible_password: sunjoo

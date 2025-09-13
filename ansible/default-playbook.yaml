@@ -2,15 +2,37 @@
 - name: Check Ansible Functions
   hosts: all
   tasks:
-    - name: Print all facts
+    - name: Print ansible_architecture
       debug:
-        var: go_target_directory
-    - name: Print all facts
+        var: "{{ ansible_architecture }}"
+    - name: Print ansible_distribution_release
       debug:
-        var: second_var
-    - name: third
+        var: "{{ ansible_distribution_release }}"
+    - name: Print ansible_os_family
       debug:
-        var: third_var
+        var: '{{ ansible_os_family | lower }}'
+    - name: Print ansible_facts
+      debug:
+        msg: "{{ ansible_default_ipv4['address'] | lower }}"
+    - name: Run shell commands with multi lines
+      ansible.builtin.shell: |
+        ls
+        uname -a
+#    - name: Copy ssh key to the server's user account
+#      ansible.builtin.authorized_key:
+#        user: "{{  ansible_user }}"
+#        state: present
+#        key: "{{  lookup('file', '~/.ssh/id_rsa.pub') }}"
+#        comment: "Added by Ansible automation"
+
+#    - name: Print all facts
+#      debug:
+#        var: second_var
+#    - name: third
+#      debug:
+#        var: third_var
+    - name: Create NFS shared folder on the host
+
   vars:
     go_target_directory: >-
       {%- if ansible_facts['os_family'] == "Debian" -%}
