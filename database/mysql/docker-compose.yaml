@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    build: .
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - '3306:3306'
+    volumes:
+      # The host path for the data volume can be overridden by setting the MYSQL_DATA_DIR environment variable.
+      # If not set, it defaults to '${HOME}/data/mysql'.
+      - ${MYSQL_DATA_DIR:-${HOME}/data/mysql}:/var/lib/mysql
