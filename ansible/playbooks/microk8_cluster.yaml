@@ -1,0 +1,70 @@
+---
+# Play 1: Install MicroK8s on all nodes
+- name: Install MicroK8s on Master and Worker Nodes
+  hosts: master, workers
+  become: yes
+  tasks:
+    - name: Ensure apt cache is updated
+      ansible.builtin.apt:
+        update_cache: yes
+      changed_when: false
+
+    - name: Install MicroK8s from snap
+      community.general.snap:
+        name: microk8s
+        classic: yes
+        channel: 1.28/stable # Use a specific stable channel for consistency
+
+    - name: Add current user to the 'microk8s' group for non-sudo access
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: microk8s
+        append: yes
+
+    - name: Wait until MicroK8s is ready
+      ansible.builtin.command: /snap/bin/microk8s status --wait-ready
+      register: microk8s_status
+      until: microk8s_status.rc == 0
+      retries: 5
+      delay: 10
+      changed_when: false # This command does not change state
+
+# Play 2: Configure Master Node and Get Join Token
+- name: Configure Master Node
+  hosts: master
+  become: yes
+  tasks:
+    - name: Generate a join token for worker nodes
+      ansible.builtin.command: /snap/bin/microk8s add-node
+      register: join_command_result
+      # Mark as changed only if a new token was actually generated
+      changed_when: "'To join this cluster' in join_command_result.stdout"
+
+    - name: Extract the join command from the output
+      ansible.builtin.set_fact:
+        join_command: "{{ join_command_result.stdout_lines | select('match', 'microk8s join') | first }}"
+
+    - name: Enable essential addons (DNS, Dashboard, Storage)
+      ansible.builtin.command: "/snap/bin/microk8s enable {{ item }}"
+      loop:
+        - dns
+        - dashboard
+        - hostpath-storage
+      changed_when: false
+
+# Play 3: Join Worker Nodes to the Cluster
+- name: Join Worker Nodes
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Check if the worker is already part of the cluster
+      ansible.builtin.command: "/snap/bin/microk8s kubectl get nodes {{ inventory_hostname }}"
+      delegate_to: "{{ groups['master'][0] }}"
+      become: yes
+      register: node_status
+      ignore_errors: true # The command fails if the node is not found, which is expected
+
+    - name: Join worker to the master node
+      ansible.builtin.shell: "{{ hostvars[groups['master'][0]]['join_command'] }}"
+      # Only run this task if the node is not already in the cluster
+      when: node_status.rc != 0

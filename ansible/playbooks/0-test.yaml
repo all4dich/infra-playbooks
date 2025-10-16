@@ -1,0 +1,16 @@
+- name: 2. Initialize the Kubernetes master node
+  hosts: master
+  become: yes
+  vars:
+    shared_dir: /mnt/share
+  tasks:
+    - name: Create minio/mysql data directory
+      ansible.builtin.file:
+        path: "{{ shared_dir }}/k8s/{{ item }}"
+        state: directory
+        owner: nobody
+        group: nogroup
+        mode: '0777'
+      loop:
+        - mysql
+        - minio

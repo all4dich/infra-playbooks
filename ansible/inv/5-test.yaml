@@ -1,0 +1,18 @@
+master:
+  hosts:
+    k8s-master:
+      ansible_host: tiburon-cloudflare
+      ansible_user: ubuntu
+      ansible_become_password: ubuntu
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+workers:
+  hosts:
+    k8s-worker1:
+      ansible_host: santarosa.sunjoo.org
+      ansible_user: ubuntu
+      ansible_become_password: ubuntu
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+ #   k8s-worker2:
+ #     ansible_host: 54.193.63.43
+ #     ansible_user: ubuntu
+ #     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -i  /Users/sunjoo/.ssh/all4dich-ec2key-on-n.cali.pem'

@@ -1,0 +1,33 @@
+---
+- name: Enable nfs shared folder
+  hosts: master
+  become: true
+  tasks:
+    - name: Install NFS utilities
+      ansible.builtin.package:
+        name: nfs-kernel-server
+        state: present
+
+    - name: Create shared folder
+      ansible.builtin.file:
+        path: /mnt/nfs_share
+        state: directory
+        owner: nobody
+        group: nogroup
+        mode: '0777'
+
+    - name: Ensure export entry is present
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "/mnt/nfs_share 192.168.0.0/16(rw,sync,no_subtree_check,no_root_squash)"
+        create: yes
+        state: present
+
+    - name: Enable and start NFS server
+      ansible.builtin.service:
+        name: nfs-kernel-server
+        enabled: yes
+        state: restarted
+
+    - name: Export the shared folder
+      ansible.builtin.command: exportfs -ra

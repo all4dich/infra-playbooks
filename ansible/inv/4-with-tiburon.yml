@@ -1,0 +1,11 @@
+master:
+  hosts:
+    muirwoods-master:
+      ansible_host: 192.168.0.35
+      ansible_user: sunjoo
+#workers:
+  hosts:
+    tiburon:
+      ansible_host: 192.168.0.182
+      ansible_user: ubuntu
+      ansible_become_password: ubuntu
