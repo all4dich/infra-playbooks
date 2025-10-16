@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  ansible-galaxy:
+    build: .
+    volumes:
+      - .:/workspace
+    platform: linux/amd64
