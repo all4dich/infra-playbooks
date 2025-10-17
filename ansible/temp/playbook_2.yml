@@ -1,0 +1,6 @@
+- name: Print debug
+  ansible.builtin.debug:
+    msg: "This is a debug message on playbook 2"
+- name: Print welcome
+  ansible.builtin.debug:
+    msg: "Welcome to playbook 2!"

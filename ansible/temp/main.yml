@@ -1,0 +1,23 @@
+- name: Playbook demonstrating static import
+  hosts: localhost
+  connection: local
+  handlers:
+    - name: print messages
+      import_tasks: playbook_2.yml
+  tasks:
+    - name: A task in the main playbook
+      ansible.builtin.debug:
+        msg: "This is a task in the main playbook"
+    - name: Import static tasks
+      ansible.builtin.import_tasks: common_tasks.yml
+    - name: Include tasks with a loop
+      ansible.builtin.include_tasks: look_tasks.yml
+      loop:
+        - one
+        - two
+        - three
+    - command: "true"
+      notify: Print debug
+    - command: "true"
+      notify: Print welcome
+- import_playbook: playbook_1.yml

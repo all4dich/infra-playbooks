@@ -1,0 +1,6 @@
+- name: Print debug message
+  hosts: localhost
+  tasks:
+    - name: Print debug message
+      ansible.builtin.debug:
+          msg: "From playbook_1.yml"
