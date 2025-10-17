@@ -1,5 +1,5 @@
 # Required
-namespace: ansible_galaxy_sunjoo
+namespace: millvalley
 name: dev_env
 version: 0.0.1
 readme: README.md
