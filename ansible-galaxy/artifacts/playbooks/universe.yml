@@ -3,3 +3,4 @@
   connection: local
   roles:
     - role: ansible_galaxy_sunjoo.dev_env.nvim
+    - role: ansible_galaxy_sunjoo.dev_env.build_tools
