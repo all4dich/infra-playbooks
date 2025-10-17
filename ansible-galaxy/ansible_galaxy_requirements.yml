@@ -1,0 +1,3 @@
+collections:
+  - source: ./artifacts
+    type: dir
