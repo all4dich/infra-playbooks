@@ -1,0 +1,10 @@
+- hosts: localhost
+  roles:
+    - foo
+    - foo
+#    - { role: foo, message: "first" }
+#    - { role: foo, message: "second" }
+#    - role: foo
+#      message: "thrid"
+#    - role: foo
+#      message: "Fourth"
