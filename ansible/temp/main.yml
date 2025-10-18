@@ -20,4 +20,12 @@
       notify: Print debug
     - command: "true"
       notify: Print welcome
+    - name: Include `common` rule
+      ansible.builtin.include_role:
+        name: common
+    - name: Import `common_import` rule
+      ansible.builtin.import_role:
+        name: common_import
+      vars:
+        my_name: tahoe
 - import_playbook: playbook_1.yml
