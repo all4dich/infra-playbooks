@@ -1,7 +1,16 @@
 version: '3.8'
 services:
-  ansible-galaxy:
+  ansible_galaxy:
     build: .
     volumes:
-      - .:/workspace
+      - ..:/workspace
+      - ./ansible.cfg:/root/.ansible.cfg
+      - ./ansible_host:/etc/ansible/hosts
     platform: linux/amd64
+  target_host:
+    build:
+      context: .
+      dockerfile: Dockerfile-target
+    platform: linux/amd64
+    depends_on:
+      - ansible_galaxy

@@ -1,0 +1,5 @@
+- name: Upload ssh public key to the remote
+  ansible.builtin.authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
