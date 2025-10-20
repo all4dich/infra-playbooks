@@ -4,4 +4,4 @@
   tasks:
     - name: Upload ssh public key
       ansible.builtin.include_role:
-        name: upload_ssh_public_key
+        name: upload_ssh_public_key.yml
