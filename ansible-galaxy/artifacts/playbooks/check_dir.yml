@@ -1,0 +1,5 @@
+- name: Check Directory
+  hosts: localhost
+  connection: local
+  roles:
+    - role: millvalley.dev_env.check_dir
