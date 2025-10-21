@@ -4,4 +4,4 @@
   tasks:
     - name: Check if editor tools are installed
       ansible.builtin.include_role:
-        name: check_linux_editor_tools
+        name: check_linux_system
