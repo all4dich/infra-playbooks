@@ -2,6 +2,6 @@
 - name: Check Linux system
   hosts: "{{ lookup('env', 'ANSIBLE_HOST') | default('all', true) }}"
   tasks:
-    - name: Check if editor tools are installed
+    - name: Check if ansbile role definitions are working correctly
       ansible.builtin.include_role:
         name: check_linux_system
