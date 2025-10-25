@@ -1,0 +1,18 @@
+namespace: deepx_v3
+name: init_dev
+version: 0.0.1
+readme: README.md
+authors:
+- Sunjoo Park <all4dich@gmail.com>
+
+
+description: your collection description
+
+license:
+- MIT
+
+license_file: ''
+
+tags: []
+
+dependencies: {}

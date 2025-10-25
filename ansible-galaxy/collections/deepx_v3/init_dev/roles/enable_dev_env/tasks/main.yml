@@ -1,0 +1,25 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Update /etc/apt/sources.list
+  ansible.builtin.copy:
+    src: sources.list
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+- name: Update apt cache
+  ansible.builtin.apt:
+   update_cache: yes
+- name: Install development environment packages
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - git
+      - curl
+      - wget
+      - vim
+      - python3
+      - python3-pip
+    state: present
+    update_cache: yes

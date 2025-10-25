@@ -1,0 +1,6 @@
+all:
+    hosts:
+        deepx_v3_1:
+            ansible_host: localhost
+            ansible_port: 30020
+            ansible_user: ubuntu

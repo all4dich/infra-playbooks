@@ -1,0 +1,5 @@
+---
+- name: Initialize Deep v3 development environment
+  hosts: all
+  roles:
+    - role: deepx_v3.init_dev.enable_dev_env
