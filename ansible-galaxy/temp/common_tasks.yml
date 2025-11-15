@@ -1,0 +1,6 @@
+- name: Task 1 from imported file
+  ansible.builtin.debug:
+    msg: "This is a task 1"
+- name: Task 2 from imported file
+  ansible.builtin.debug:
+    msg: "This is a task 2"

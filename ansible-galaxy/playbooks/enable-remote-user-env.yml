@@ -1,0 +1,7 @@
+---
+- name: Copy ssh key file to the remote
+  hosts: "{{ lookup('env', 'ANSIBLE_HOST') | default('all', true) }}"
+  tasks:
+    - name: Upload ssh public key
+      ansible.builtin.include_role:
+        name: upload_ssh_public_key.yml

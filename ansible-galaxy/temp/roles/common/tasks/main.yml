@@ -1,0 +1,13 @@
+- name: Print nvim message
+  ansible.builtin.debug:
+    msg: "Sunjoo Park"
+- name: Install neovim
+  ansible.builtin.apt:
+    name: neovim
+    state: present
+    update_cache: true
+- name: Install telnet
+  ansible.builtin.apt:
+    name: telnet
+    state: present
+    update_cache: true

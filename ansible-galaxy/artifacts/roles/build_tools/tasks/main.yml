@@ -1,0 +1,32 @@
+- name: Install Essential Build Tools
+  become: true
+  ansible.builtin.apt:
+    name:
+      - ssh
+      - keychain
+      - make
+      - cmake
+      - python3-cryptography
+      - clang-format
+      - automake
+      - autoconf
+      - pkg-config
+      - python3-pip
+      - clang
+      - libtool-bin
+      - npm
+      - nodejs
+      - vim
+      - curl
+      - build-essential
+      - unzip
+      - gettext
+      - ninja-build
+      - clang-tidy
+      - yacc
+      - libevent-dev
+      - bison
+      - libncurses-dev
+      - libsqlite3-dev
+    state: latest
+    update_cache: true

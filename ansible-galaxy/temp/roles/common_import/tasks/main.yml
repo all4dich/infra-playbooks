@@ -1,0 +1,8 @@
+- name: Print rule message in common_import
+  ansible.builtin.debug:
+    msg: "Run in common_import: {{ my_name }}"
+- name: Install tmux
+  ansible.builtin.apt:
+    name: tmux
+    state: present
+    update_cache: true

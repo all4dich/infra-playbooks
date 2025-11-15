@@ -1,0 +1,4 @@
+all:
+  hosts:
+    target_host:
+      ansible_host: target_host

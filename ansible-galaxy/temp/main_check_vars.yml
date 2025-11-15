@@ -1,0 +1,7 @@
+- hosts: localhost
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Print debug message
+      ansible.builtin.debug:
+        msg: "{{ welcome_message }}"

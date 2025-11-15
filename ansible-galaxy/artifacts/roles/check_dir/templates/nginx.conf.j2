@@ -1,0 +1,8 @@
+server {
+    listen {{ http_port }};
+    server_name {{ server_name }};
+
+    location / {
+        root /var/www/html;
+    }
+}

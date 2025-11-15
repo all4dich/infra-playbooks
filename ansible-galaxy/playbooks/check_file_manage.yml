@@ -1,0 +1,13 @@
+---
+- name: Create file
+  hosts: "{{ lookup('env', 'ANSIBLE_HOST') | default('all', true) }}"
+  tasks:
+    - name: File generation
+      ansible.builtin.include_role:
+        name: create_file
+    - name: Check generated file
+      ansible.builtin.shell: "ls -l /tmp/"
+      register: ls_output
+    - name: Print
+      ansible.builtin.debug:
+        msg: "{{ ls_output['stdout_lines'] }}"

@@ -1,0 +1,5 @@
+allow_duplicates: true
+dependencies:
+  - role: common_import
+    vars:
+      my_name: "Sunjoo"

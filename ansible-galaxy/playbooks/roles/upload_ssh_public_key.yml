@@ -1,0 +1,17 @@
+---
+- name: Trigger a prompt to let a user to write key file local path
+  ansible.builtin.pause:
+    prompt: "\n## Enter key file path"
+  register: key_file_path
+  run_once: true
+  delegate_to: localhost
+
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ hostvars['target_host']['key_file_path']['user_input'] }}"
+
+- name: Upload ssh public key to the remote
+  ansible.builtin.authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', hostvars['target_host']['key_file_path']['user_input']) }}"

@@ -1,0 +1,8 @@
+---
+- name: Create file
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'TARGET_FILE_PATH') | default('/tmp/data.txt', true) }}"
+    state: "touch"
+    mode: '0755'
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'

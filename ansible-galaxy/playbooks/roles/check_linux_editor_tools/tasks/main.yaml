@@ -1,0 +1,18 @@
+---
+- name: Install emacs
+  ansible.builtin.apt:
+    name:
+      - emacs
+- name: Check if emacs command exits
+  ansible.builtin.command: which emacs
+  ignore_errors: true
+- name: Check if vim command exists
+  ansible.builtin.command: which vim
+  ignore_errors: true
+- name: Create file
+  ansible.builtin.file:
+    path: /tmp/data2.txt
+    state: touch
+    mode: '0755'
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'

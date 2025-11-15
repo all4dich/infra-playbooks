@@ -1,0 +1,6 @@
+- name: Install nvim(Neovim)
+  become: true
+  ansible.builtin.apt:
+    name: neovim
+    state: latest
+    update_cache: true
